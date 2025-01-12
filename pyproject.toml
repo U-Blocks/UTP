@@ -1,0 +1,11 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "endstone-utp"
+version = "250108"
+description = "null"
+
+[project.entry-points."endstone"]
+utp = "endstone_utp:utp"

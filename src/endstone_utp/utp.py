@@ -95,6 +95,7 @@ class utp(Plugin):
             main_form.add_button(f'{ColorFormat.YELLOW}我的传送点', icon='textures/items/ender_pearl', on_click=self.home)
             main_form.add_button(f'{ColorFormat.YELLOW}地标传送点', icon='textures/ui/worldsIcon', on_click=self.warp)
             main_form.add_button(f'{ColorFormat.YELLOW}玩家互传', icon='textures/ui/dressing_room_customization', on_click=self.tpa_and_tpahere)
+            main_form.add_button(f'{ColorFormat.YELLOW}玩家互传设置', icon='textures/ui/', on_click=None)
             main_form.add_button(f'{ColorFormat.YELLOW}随机传送', icon='textures/ui/icon_random', on_click=self.tpr)
             main_form.add_button(f'{ColorFormat.YELLOW}返回上一死亡点', icon='textures/ui/friend_glyph_desaturated', on_click=self.back_to_last_death_point)
             if player.is_op == True:
@@ -295,7 +296,7 @@ class utp(Plugin):
             elif home_dim == 'Nether':
                 target_dim = self.server.level.get_dimension('NETHER')
             else:
-                target_dim = self.server.level.get_dimension('THE_END')
+                target_dim = self.server.level.get_dimension('THEEND')
             target_loc = Location(
                 target_dim,
                 x=float(home_loc[0]),
@@ -389,7 +390,7 @@ class utp(Plugin):
             elif warp_dim == 'Nether':
                 target_dim = self.server.level.get_dimension('NETHER')
             else:
-                target_dim = self.server.level.get_dimension('THE_END')
+                target_dim = self.server.level.get_dimension('THEEND')
             target_loc = Location(
                 target_dim,
                 x=float(warp_loc[0]),
@@ -662,7 +663,7 @@ class utp(Plugin):
                 elif self.record_death[player.name]['death_dim'] == 'Nether':
                     target_dim = self.server.level.get_dimension('NETHER')
                 else:
-                    target_dim = self.server.level.get_dimension('THE_END')
+                    target_dim = self.server.level.get_dimension('THEEND')
                 death_loc = self.record_death[player.name]['death_loc']
                 target_loc = Location(
                     target_dim,

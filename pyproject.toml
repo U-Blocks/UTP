@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone-utp"
-version = "250108"
+version = "250113"
 description = "null"
 
 [project.entry-points."endstone"]

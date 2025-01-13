@@ -7,7 +7,7 @@ from endstone.plugin import Plugin
 from endstone.level import Location
 from endstone.event import event_handler, PlayerJoinEvent, PlayerDeathEvent
 from endstone.command import Command, CommandSender, CommandSenderWrapper
-from endstone.form import ActionForm, ModalForm, Dropdown, TextInput
+from endstone.form import ActionForm, ModalForm, Dropdown, TextInput, Toggle
 
 current_dir = os.getcwd()
 first_dir = os.path.join(current_dir, 'plugins', 'utp')
@@ -15,6 +15,7 @@ if not os.path.exists(first_dir):
     os.mkdir(first_dir)
 home_data_file_path = os.path.join(first_dir, 'home.json')
 warp_data_file_path = os.path.join(first_dir, 'warp.json')
+tpa_setting_file_path = os.path.join(first_dir, 'tpa_setting.json')
 config_data_file_path = os.path.join(first_dir, 'config.json')
 menu_file_path = os.path.join('plugins', 'zx_ui')
 
@@ -42,6 +43,16 @@ class utp(Plugin):
             with open(warp_data_file_path, 'r', encoding='utf-8') as f:
                 warp_data = json.loads(f.read())
         self.warp_data = warp_data
+        # 加载 tpa 设置数据
+        if not os.path.exists(tpa_setting_file_path):
+            tpa_setting_data = {}
+            with open(tpa_setting_file_path, 'w', encoding='utf-8') as f:
+                json_str = json.dumps(tpa_setting_data, indent=4, ensure_ascii=False)
+                f.write(json_str)
+        else:
+            with open(tpa_setting_file_path, 'r', encoding='utf-8') as f:
+                tpa_setting_data = json.loads(f.read())
+        self.tpa_setting_data = tpa_setting_data
         # 加载 config 数据
         if not os.path.exists(config_data_file_path):
             config_data = {
@@ -95,7 +106,7 @@ class utp(Plugin):
             main_form.add_button(f'{ColorFormat.YELLOW}我的传送点', icon='textures/items/ender_pearl', on_click=self.home)
             main_form.add_button(f'{ColorFormat.YELLOW}地标传送点', icon='textures/ui/worldsIcon', on_click=self.warp)
             main_form.add_button(f'{ColorFormat.YELLOW}玩家互传', icon='textures/ui/dressing_room_customization', on_click=self.tpa_and_tpahere)
-            main_form.add_button(f'{ColorFormat.YELLOW}玩家互传设置', icon='textures/ui/', on_click=None)
+            main_form.add_button(f'{ColorFormat.YELLOW}玩家互传设置', icon='textures/ui/icon_setting', on_click=self.tpa_setting)
             main_form.add_button(f'{ColorFormat.YELLOW}随机传送', icon='textures/ui/icon_random', on_click=self.tpr)
             main_form.add_button(f'{ColorFormat.YELLOW}返回上一死亡点', icon='textures/ui/friend_glyph_desaturated', on_click=self.back_to_last_death_point)
             if player.is_op == True:
@@ -519,9 +530,14 @@ class utp(Plugin):
 
     # tpa & tpahere
     def tpa_and_tpahere(self, player: Player):
-        online_player_list = [online_player.name for online_player in self.server.online_players if online_player.name != player.name]
+        tpa_deny_player_list = []
+        for key, value in self.tpa_setting_data.items():
+            if value == False:
+                tpa_deny_player_list.append(key)
+        online_player_list = [online_player.name for online_player in self.server.online_players if online_player.name != player.name
+                              or online_player.name not in tpa_deny_player_list]
         if len(online_player_list) == 0:
-            player.send_message(f'{ColorFormat.RED}当前没有其他玩家在线...')
+            player.send_message(f'{ColorFormat.RED}当前没有可执行互传的玩家在线...')
             return
         dropdown1 = Dropdown(
             label=f'{ColorFormat.GREEN}选择玩家...',
@@ -614,6 +630,39 @@ class utp(Plugin):
                 return None
         return on_click
 
+    # tpa 设置
+    def tpa_setting(self, player: Player):
+        toggle = Toggle(
+            label=f'{ColorFormat.YELLOW}允许其他玩家向你发送互传请求'
+        )
+        if self.tpa_setting_data[player.name] == True:
+            toggle.default_value = True
+        else:
+            toggle.default_value = False
+        tpa_setting_form = ModalForm(
+            title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}玩家互传设置',
+            controls=[toggle],
+            on_close=self.back_to_main_form,
+            submit_button=f'{ColorFormat.YELLOW}更新'
+        )
+        def on_submit(player: Player, json_str):
+            data = json.loads(json_str)
+            if data[0] == True:
+                update_tpa_setting = True
+            else:
+                update_tpa_setting = False
+            self.tpa_setting_data[player.name] = update_tpa_setting
+            self.save_tpa_setting_data()
+            player.send_message(f'{ColorFormat.YELLOW}玩家互传设置更新成功...')
+        tpa_setting_form.on_submit = on_submit
+        player.send_form(tpa_setting_form)
+
+    # 保存 tpa 设置数据
+    def save_tpa_setting_data(self):
+        with open(tpa_setting_file_path, 'w+', encoding='utf-8') as f:
+            json_str = json.dumps(self.tpa_setting_data, indent=4, ensure_ascii=False)
+            f.write(json_str)
+
     # tpr 随机传送
     def tpr(self, player: Player):
         if not self.record_tpr.get(player.name):
@@ -683,31 +732,31 @@ class utp(Plugin):
     def reload_config_data(self, player: Player):
         textinput1 = TextInput(
             label=f'{ColorFormat.GREEN}当前允许玩家拥有私人传送点个数： '
-                  f'{ColorFormat.WHITE}{self.config_data['max_home_per_player']}\n'
+                  f'{ColorFormat.WHITE}{self.config_data["max_home_per_player"]}\n'
                   f'{ColorFormat.GREEN}输入新的私人传送点个数（留空则保留原配置）...',
             placeholder='请输入一个正整数, 例如： 5'
         )
         textinput2 = TextInput(
             label=f'{ColorFormat.GREEN}当前随机传送范围： '
-                  f'{ColorFormat.WHITE}{self.config_data['tpr_range']}\n'
+                  f'{ColorFormat.WHITE}{self.config_data["tpr_range"]}\n'
                   f'{ColorFormat.GREEN}输入新的随机传送范围（留空则保留原配置）...',
             placeholder='请输入一个正整数, 例如： 2000'
         )
         textinput3 = TextInput(
             label=f'{ColorFormat.GREEN}当前随机传送冷却时间： '
-                  f'{ColorFormat.WHITE}{self.config_data['tpr_cool_down']}\n'
+                  f'{ColorFormat.WHITE}{self.config_data["tpr_cool_down"]}\n'
                   f'{ColorFormat.GREEN}输入新的随机传送冷却时间（留空则保留原配置）...',
             placeholder='请输入一个正整数, 例如： 60'
         )
         textinput4 = TextInput(
             label=f'{ColorFormat.GREEN}当前随机传送无敌时间： '
-                  f'{ColorFormat.WHITE}{self.config_data['tpr_protect_time']}\n'
+                  f'{ColorFormat.WHITE}{self.config_data["tpr_protect_time"]}\n'
                   f'{ColorFormat.GREEN}输入新的随机传送无敌时间（留空则保留原配置）...',
             placeholder='请输入一个正整数, 例如： 20'
         )
         textinput5 = TextInput(
             label=f'{ColorFormat.GREEN}当前返回上一死亡点冷却时间： '
-                  f'{ColorFormat.WHITE}{self.config_data['back_to_death_point_cool_down']}\n'
+                  f'{ColorFormat.WHITE}{self.config_data["back_to_death_point_cool_down"]}\n'
                   f'{ColorFormat.GREEN}输入新的返回上一死亡点冷却时间（留空则保留原配置）...',
             placeholder='请输入一个正整数, 例如： 30'
         )
@@ -773,3 +822,6 @@ class utp(Plugin):
         if not self.home_data.get(event.player.name):
             self.home_data[event.player.name] = {}
             self.save_home_data()
+        if not self.tpa_setting_data.get(event.player.name):
+            self.tpa_setting_data[event.player.name] = True
+            self.save_tpa_setting_data()

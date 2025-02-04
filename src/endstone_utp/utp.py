@@ -530,12 +530,17 @@ class utp(Plugin):
 
     # tpa & tpahere
     def tpa_and_tpahere(self, player: Player):
+        # 获取屏蔽互传的玩家列表
         tpa_deny_player_list = []
         for key, value in self.tpa_setting_data.items():
-            if value == False:
+            if not value:
                 tpa_deny_player_list.append(key)
-        online_player_list = [online_player.name for online_player in self.server.online_players if online_player.name != player.name
-                              or online_player.name not in tpa_deny_player_list]
+        online_player_list = []
+        # 筛选出真正可用的互传列表
+        for online_player in self.server.online_players:
+            if online_player.name != player.name:
+                if online_player.name not in tpa_deny_player_list:
+                    online_player_list.append(online_player.name)
         if len(online_player_list) == 0:
             player.send_message(f'{ColorFormat.RED}当前没有可执行互传的玩家在线...')
             return
@@ -829,6 +834,7 @@ class utp(Plugin):
         if not self.home_data.get(event.player.name):
             self.home_data[event.player.name] = {}
             self.save_home_data()
-        if not self.tpa_setting_data.get(event.player.name):
+        # 这里因为 value 是 bool 值, 所以直接用 None 来检测, 而不是 not
+        if self.tpa_setting_data.get(event.player.name) is None:
             self.tpa_setting_data[event.player.name] = True
             self.save_tpa_setting_data()

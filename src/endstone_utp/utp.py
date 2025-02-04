@@ -564,6 +564,8 @@ class utp(Plugin):
                     player.send_message(f'{ColorFormat.RED}发送请求失败： {ColorFormat.WHITE}{target_player_name} 已离线...')
                     return
                 else:
+                    # 向 TPA 发起者发送提示信息
+                    player.send_message(f'{ColorFormat.YELLOW}发送 TPA 请求成功...')
                     target_player = self.server.get_player(target_player_name)
                     tpa_form = ActionForm(
                         title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}TPA 请求',
@@ -578,6 +580,8 @@ class utp(Plugin):
                     player.send_message(f'{ColorFormat.RED}发送请求失败： {ColorFormat.WHITE}{target_player_name} 已离线...')
                     return
                 else:
+                    # 向 TPAHere 发起者发送提示信息
+                    player.send_message(f'{ColorFormat.YELLOW}发送 TPAHere 请求成功...')
                     target_player = self.server.get_player(target_player_name)
                     tpahere_form = ActionForm(
                         title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}TPAHere 请求',
@@ -635,7 +639,7 @@ class utp(Plugin):
         toggle = Toggle(
             label=f'{ColorFormat.YELLOW}允许其他玩家向你发送互传请求'
         )
-        if self.tpa_setting_data[player.name] == True:
+        if self.tpa_setting_data[player.name]:
             toggle.default_value = True
         else:
             toggle.default_value = False
@@ -647,7 +651,7 @@ class utp(Plugin):
         )
         def on_submit(player: Player, json_str):
             data = json.loads(json_str)
-            if data[0] == True:
+            if data[0]:
                 update_tpa_setting = True
             else:
                 update_tpa_setting = False
@@ -733,32 +737,42 @@ class utp(Plugin):
         textinput1 = TextInput(
             label=f'{ColorFormat.GREEN}当前允许玩家拥有私人传送点个数： '
                   f'{ColorFormat.WHITE}{self.config_data["max_home_per_player"]}\n'
-                  f'{ColorFormat.GREEN}输入新的私人传送点个数（留空则保留原配置）...',
-            placeholder='请输入一个正整数, 例如： 5'
+                  f'{ColorFormat.GREEN}输入新的私人传送点个数...\n'
+                  f'{ColorFormat.GREEN}（请输入一个正整数, 例如： 5...）',
+            placeholder='请输入一个正整数, 例如： 5...',
+            default_value=f'{self.config_data["max_home_per_player"]}'
         )
         textinput2 = TextInput(
             label=f'{ColorFormat.GREEN}当前随机传送范围： '
                   f'{ColorFormat.WHITE}{self.config_data["tpr_range"]}\n'
-                  f'{ColorFormat.GREEN}输入新的随机传送范围（留空则保留原配置）...',
-            placeholder='请输入一个正整数, 例如： 2000'
+                  f'{ColorFormat.GREEN}输入新的随机传送范围...\n'
+                  f'{ColorFormat.GREEN}（请输入一个正整数, 例如： 2000...）',
+            placeholder='请输入一个正整数, 例如： 2000...',
+            default_value=f'{self.config_data["tpr_range"]}'
         )
         textinput3 = TextInput(
             label=f'{ColorFormat.GREEN}当前随机传送冷却时间： '
                   f'{ColorFormat.WHITE}{self.config_data["tpr_cool_down"]}\n'
-                  f'{ColorFormat.GREEN}输入新的随机传送冷却时间（留空则保留原配置）...',
-            placeholder='请输入一个正整数, 例如： 60'
+                  f'{ColorFormat.GREEN}输入新的随机传送冷却时间...\n'
+                  f'{ColorFormat.GREEN}（请输入一个正整数, 例如： 60...）',
+            placeholder='请输入一个正整数, 例如： 60...',
+            default_value=f'{self.config_data["tpr_cool_down"]}'
         )
         textinput4 = TextInput(
             label=f'{ColorFormat.GREEN}当前随机传送无敌时间： '
                   f'{ColorFormat.WHITE}{self.config_data["tpr_protect_time"]}\n'
-                  f'{ColorFormat.GREEN}输入新的随机传送无敌时间（留空则保留原配置）...',
-            placeholder='请输入一个正整数, 例如： 20'
+                  f'{ColorFormat.GREEN}输入新的随机传送无敌时间...\n'
+                  f'{ColorFormat.GREEN}（请输入一个正整数, 例如： 20...）',
+            placeholder='请输入一个正整数, 例如： 20...',
+            default_value=f'{self.config_data["tpr_protect_time"]}'
         )
         textinput5 = TextInput(
             label=f'{ColorFormat.GREEN}当前返回上一死亡点冷却时间： '
                   f'{ColorFormat.WHITE}{self.config_data["back_to_death_point_cool_down"]}\n'
-                  f'{ColorFormat.GREEN}输入新的返回上一死亡点冷却时间（留空则保留原配置）...',
-            placeholder='请输入一个正整数, 例如： 30'
+                  f'{ColorFormat.GREEN}输入新的返回上一死亡点冷却时间...\n'
+                  f'{ColorFormat.GREEN}（请输入一个正整数, 例如： 30...）',
+            placeholder='请输入一个正整数, 例如： 30...',
+            default_value=f'{self.config_data["back_to_death_point_cool_down"]}'
         )
         reload_config_data_form = ModalForm(
             title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}重载配置文件',
@@ -768,39 +782,32 @@ class utp(Plugin):
         )
         def on_submit(player: Player, json_str):
             data = json.loads(json_str)
+            # 判断所有 textinput 是否被填写
+            for i in range(len(data)):
+                if len(data[i]) == 0:
+                    player.send_message(f'{ColorFormat.RED}表单解析错误, 请按提示正确填写...')
+                    return
+            # 判断所有 textinput 是否填写了正确的数字类型
             try:
-                if len(data[0]) == 0:
-                    new_max_home_per_player = self.config_data['max_home_per_player']
-                else:
-                    new_max_home_per_player = int(data[0])
-                if len(data[1]) == 0:
-                    new_tpr_range = self.config_data['tpr_range']
-                else:
-                    new_tpr_range = int(data[1])
-                if len(data[2]) == 0:
-                    new_tpr_cool_down = self.config_data['tpr_cool_down']
-                else:
-                    new_tpr_cool_down = int(data[2])
-                if len(data[3]) == 0:
-                    new_tpr_protect_time = self.config_data['tpr_protect_time']
-                else:
-                    new_tpr_protect_time = int(data[3])
-                if len(data[4]) == 0:
-                    new_back_to_death_point_cool_down = self.config_data['back_to_death_point_cool_down']
-                else:
-                    new_back_to_death_point_cool_down = int(data[4])
+                update_max_home_per_player = int(data[0])
+                update_tpr_range = int(data[1])
+                update_tpr_cool_down = int(data[2])
+                update_tpr_protect_time = int(data[3])
+                update_back_to_death_point_cool_down = int(data[4])
             except:
                 player.send_message(f'{ColorFormat.RED}表单解析错误, 请按提示正确填写...')
                 return
-            if (new_max_home_per_player <= 0 or new_tpr_range <=0 or new_tpr_cool_down <=0
-                    or new_tpr_protect_time <= 0 or new_back_to_death_point_cool_down <= 0):
+            if (update_max_home_per_player <= 0 or update_tpr_range <= 0
+                    or update_tpr_cool_down <= 0 or update_tpr_protect_time <=0
+                    or update_back_to_death_point_cool_down <= 0):
                 player.send_message(f'{ColorFormat.RED}表单解析错误, 请按提示正确填写...')
                 return
-            self.config_data['max_home_per_player'] = new_max_home_per_player
-            self.config_data['tpr_range'] = new_tpr_range
-            self.config_data['tpr_cool_down'] = new_tpr_cool_down
-            self.config_data['tpr_protect_time'] = new_tpr_protect_time
-            self.config_data['back_to_death_point_cool_down'] = new_back_to_death_point_cool_down
+            # 写入新配置
+            self.config_data['max_home_per_player'] = update_max_home_per_player
+            self.config_data['tpr_range'] = update_tpr_range
+            self.config_data['tpr_cool_down'] = update_tpr_cool_down
+            self.config_data['tpr_protect_time'] = update_tpr_protect_time
+            self.config_data['back_to_death_point_cool_down'] = update_back_to_death_point_cool_down
             self.save_config_data()
             player.send_message(f'{ColorFormat.YELLOW}重载配置文件成功...')
         reload_config_data_form.on_submit = on_submit

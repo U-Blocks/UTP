@@ -6,14 +6,15 @@
  <p align="left">
   <samp>
     <br />:mushroom: Introductions:
-    <br />---[Rich features]: Home, Warp, TPA & TPAHere, 
+    <br />---[Rich features]: Home, Warp, TPA & TPAHere, TPASetting, TPR, Back (back to the last dearth point.)
+    <br />---[Full GUI]: Beautiful GUI forms for easy operation rather than commands.
+    <br />---[Hot reload support]: Operators can edit/update <code>config.json</code> in game directly.
     <br />
-    <br />:file_folder: How to get release version? -- Now, you can get this plugin's release version from Github or <code><a href="https://www.minebbs.com/resources/authors/umaru.3812/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt=Minebbs" /></a>&nbsp;Minebbs</code>.
+    <br />:file_folder: How to get the release version? -- Now, you can get this plugin's release version from Github or <code><a href="https://www.minebbs.com/resources/authors/umaru.3812/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt=Minebbs" /></a>&nbsp;Minebbs</code>.
     <br />
     <br />:hammer: How to install?
     <br />---[Plugins loader]：Endstone
-    <br />---[Required pre-plugin]：jsonmoney
-    <br />---[Optional pre-plugin]：ZX_UI
+    <br />---[Optional pre-plugin]：<a href="">ZX_UI</a>
     <br />Just put this plugin into plugins folder, and then start the server. Enter the command /ul to call out the main form.
     <br />
     <br />:pencil:Wiki

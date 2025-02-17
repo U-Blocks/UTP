@@ -26,7 +26,7 @@ Plugins/
 ```
 
 ### Configuration
-UTP allows operators or players to edit/update relevant settings through GUI forms with ease, here is just simple explanations for these configurations.
+UTP allows operators or players to edit/update relevant settings through GUI forms with ease, here are just simple explanations for these configurations.
 
 `config.json`
 ```json
@@ -40,7 +40,7 @@ UTP allows operators or players to edit/update relevant settings through GUI for
 ```
 
 ### Screenshots
-Due to the extreme ease of use of UTP, there is no wiki available. You can view related screenshots of UTP form images folder of this repo.
+Due to the extreme ease of use of UTP, there is no wiki available. You can view related screenshots of UTP from images folder of this repo.
 
 ![](https://img.shields.io/badge/language-python-blue.svg) [![GitHub License](https://img.shields.io/github/license/umarurize/UTP)](LICENSE)
 

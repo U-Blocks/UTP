@@ -1,4 +1,6 @@
-![header](https://capsule-render.vercel.app/api?type=waving&height=150&color=gradient&text=UTP&fontColor=0:8871e5,100:b678c4&fontSize=50&desc=A%20de-commanded%20teleportation%20collection%20plug-in.&descAlignY=80&descSize=20&animation=fadeIn)
+![header](https://capsule-render.vercel.app/api?type=venom&height=150&color=gradient&text=UTP&fontColor=0:8871e5,100:b678c4&fontSize=50&desc=A%20de-commanded%20teleportation%20collection%20plug-in.&descAlignY=80&descSize=20&animation=fadeIn)
+
+****
 
 <code><a href="https://github.com/umarurize/UTP"><img height="25" src="https://github.com/umarurize/UTP/blob/master/logo/UTP.png" alt="UTP" /></a>&nbsp;UTP</code>
 
@@ -24,7 +26,7 @@ Plugins/
 ```
 
 ### Configuration
-UTP allows operators or players to edit/update relevant settings through GUI forms with ease, here is just simple explanations for these configurations.
+UTP allows operators or players to edit/update relevant settings through GUI forms with ease, here are just simple explanations for these configurations.
 
 `config.json`
 ```json
@@ -38,7 +40,7 @@ UTP allows operators or players to edit/update relevant settings through GUI for
 ```
 
 ### Screenshots
-Due to the extreme ease of use of UTP, there is no wiki available. You can view related screenshots of UTP form images folder of this repo.
+Due to the extreme ease of use of UTP, there is no wiki available. You can view related screenshots of UTP from images folder of this repo.
 
 ![](https://img.shields.io/badge/language-python-blue.svg) [![GitHub License](https://img.shields.io/github/license/umarurize/UTP)](LICENSE)
 

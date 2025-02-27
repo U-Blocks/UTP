@@ -20,7 +20,7 @@ config_data_file_path = os.path.join(first_dir, 'config.json')
 menu_file_path = os.path.join('plugins', 'zx_ui')
 
 class utp(Plugin):
-    api_version = '0.5'
+    api_version = '0.6'
 
     def on_enable(self):
         # 加载 home 数据

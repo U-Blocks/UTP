@@ -4,6 +4,9 @@
 
 <code><a href="https://github.com/umarurize/UTP"><img height="25" src="https://github.com/umarurize/UTP/blob/master/logo/UTP.png" alt="UTP" /></a>&nbsp;UTP</code>
 
+[![Minecraft - Version](https://img.shields.io/badge/minecraft-v1.21.60_(Bedrock)-black)](https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs)
+[![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
+
 ### Introductions
 * **Rich features:** `Home`, `Warp`, `TPA`, `TPAHere`, `TPASetting`, `TPR`, `Back` (back to the last death point.)
 * **Full GUI:** Beautiful GUI forms for easy operation rather than commands.

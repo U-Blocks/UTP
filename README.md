@@ -16,7 +16,7 @@
 Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
 
 ### Download
-Now, you can get the release version form this repo or <code><a href="https://www.minebbs.com/resources/utp.10159/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt="Minebbs" /></a>&nbsp;Minebbs</code>.
+Now, you can get the release version form this repo or <code><a href="https://www.minebbs.com/resources/uland-2d-light-gui.9967/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt="Minebbs" /></a>&nbsp;Minebbs</code>.
 
 ### File structure
 ```

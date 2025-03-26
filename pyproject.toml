@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone-utp"
-version = "250221"
-description = "null"
+version = "250326"
+description = "A de-commanded teleportation collection plug-in."
 
 [project.entry-points."endstone"]
 utp = "endstone_utp:utp"

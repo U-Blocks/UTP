@@ -689,9 +689,9 @@ class utp(Plugin):
         request_time = time.time()
         self.server.dispatch_command(self.sender_wrapper,
                                      f'spreadplayers {player_pos[0]} {player_pos[1]} 0 '
-                                     f'{self.config_data['tpr_range']} {player_name}')
+                                     f'{self.config_data["tpr_range"]} {player_name}')
         self.server.dispatch_command(self.sender_wrapper,
-                                     f'effect {player_name} resistance {self.config_data['tpr_protect_time']} 255 true')
+                                     f'effect {player_name} resistance {self.config_data["tpr_protect_time"]} 255 true')
         self.record_tpr[player.name] = request_time
         self.server.broadcast_message(f'{ColorFormat.YELLOW}[随机传送]： {ColorFormat.WHITE}'
                                       f'玩家 {player.name} 正在执行随机传送, 可能会造成卡顿...')

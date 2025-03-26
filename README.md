@@ -39,6 +39,13 @@ UTP allows operators or players to edit/update relevant settings through GUI for
     "tpr_cool_down": 60,  // the cooldown time for calling the random teleportation
     "tpr_protect_time": 25,  // the protection time after calling the random teleportation
     "back_to_death_point_cool_down": 60  // the cooldown time for calling the back
+    "is_enable": {
+        "home": true,
+        "warp": true,
+        "tpa_and_tpahere": true,
+        "tpr": true,
+        "back": true
+    }
 }
 ```
 

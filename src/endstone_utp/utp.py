@@ -60,15 +60,42 @@ class utp(Plugin):
                 'tpr_range': 2000,
                 'tpr_cool_down': 60,
                 'tpr_protect_time': 20,
-                'back_to_death_point_cool_down': 30
+                'back_to_death_point_cool_down': 30,
+                'is_enable': {
+                    'home': True,
+                    'warp': True,
+                    'tpa_and_tpahere': True,
+                    'tpr': True,
+                    'back': True
+                }
             }
             with open(config_data_file_path, 'w', encoding='utf-8') as f:
                 json_str = json.dumps(config_data, indent=4, ensure_ascii=False)
                 f.write(json_str)
         else:
             with open(config_data_file_path, 'r', encoding='utf-8') as f:
-                config_data = json.loads(f.read())
+                pre_config_data = json.loads(f.read())
+            if pre_config_data.get('max_home_per_player') is None:
+                pre_config_data['max_home_per_player'] = 5
+            if pre_config_data.get('tpr_range') is None:
+                pre_config_data['tpr_range'] = 2000
+            if pre_config_data.get('tpr_cool_down') is None:
+                pre_config_data['tpr_cool_down'] = 60
+            if pre_config_data.get('tpr_protect_time') is None:
+                pre_config_data['tpr_protect_time'] = 20
+            if pre_config_data.get('back_to_death_point_cool_down') is None:
+                pre_config_data['back_to_death_point_cool_down'] = 30
+            if pre_config_data.get('is_enable') is None:
+                pre_config_data['is_enable'] = {
+                    'home': True,
+                    'warp': True,
+                    'tpa_and_tpahere': True,
+                    'tpr': True,
+                    'back': True
+                }
+            config_data = pre_config_data
         self.config_data = config_data
+        self.save_config_data()
         self.sender_wrapper = CommandSenderWrapper(
             self.server.command_sender,
             on_message=None
@@ -103,13 +130,18 @@ class utp(Plugin):
                 title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}传送合集主表单',
                 content=f'{ColorFormat.GREEN}请选择操作...',
             )
-            main_form.add_button(f'{ColorFormat.YELLOW}我的传送点', icon='textures/items/ender_pearl', on_click=self.home)
-            main_form.add_button(f'{ColorFormat.YELLOW}地标传送点', icon='textures/ui/worldsIcon', on_click=self.warp)
-            main_form.add_button(f'{ColorFormat.YELLOW}玩家互传', icon='textures/ui/dressing_room_customization', on_click=self.tpa_and_tpahere)
-            main_form.add_button(f'{ColorFormat.YELLOW}玩家互传设置', icon='textures/ui/icon_setting', on_click=self.tpa_setting)
-            main_form.add_button(f'{ColorFormat.YELLOW}随机传送', icon='textures/ui/icon_random', on_click=self.tpr)
-            main_form.add_button(f'{ColorFormat.YELLOW}返回上一死亡点', icon='textures/ui/friend_glyph_desaturated', on_click=self.back_to_last_death_point)
-            if player.is_op == True:
+            if self.config_data['is_enable']['home']:
+                main_form.add_button(f'{ColorFormat.YELLOW}我的传送点', icon='textures/items/ender_pearl', on_click=self.home)
+            if self.config_data['is_enable']['warp']:
+                main_form.add_button(f'{ColorFormat.YELLOW}地标传送点', icon='textures/ui/worldsIcon', on_click=self.warp)
+            if self.config_data['is_enable']['tpa_and_tpahere']:
+                main_form.add_button(f'{ColorFormat.YELLOW}玩家互传', icon='textures/ui/dressing_room_customization', on_click=self.tpa_and_tpahere)
+                main_form.add_button(f'{ColorFormat.YELLOW}玩家互传设置', icon='textures/ui/icon_setting', on_click=self.tpa_setting)
+            if self.config_data['is_enable']['tpr']:
+                main_form.add_button(f'{ColorFormat.YELLOW}随机传送', icon='textures/ui/icon_random', on_click=self.tpr)
+            if self.config_data['is_enable']['back']:
+                main_form.add_button(f'{ColorFormat.YELLOW}返回上一死亡点', icon='textures/ui/friend_glyph_desaturated', on_click=self.back_to_last_death_point)
+            if player.is_op:
                 main_form.add_button(f'{ColorFormat.YELLOW}重载配置文件', icon='textures/ui/icon_setting', on_click=self.reload_config_data)
             if not os.path.exists(menu_file_path):
                 main_form.on_close = None
@@ -117,6 +149,10 @@ class utp(Plugin):
             else:
                 main_form.on_close = self.back_to_menu
                 main_form.add_button(f'{ColorFormat.YELLOW}返回', icon='textures/ui/refresh_light', on_click=self.back_to_menu)
+            if not player.is_op:
+                if len(main_form.buttons) == 1:
+                    player.send_message(f'{ColorFormat.RED}UTP 的所有功能已被禁用...')
+                    return
             player.send_form(main_form)
 
     # home 主表单
@@ -739,6 +775,18 @@ class utp(Plugin):
 
     # 重载配置文件
     def reload_config_data(self, player: Player):
+        reload_config_data_form = ActionForm(
+            title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}重载配置文件',
+            content=f'{ColorFormat.GREEN}请选择操作...',
+            on_close=self.back_to_main_form
+        )
+        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}重载 UTP 全局配置', icon='textures/ui/icon_setting', on_click=self.reload_utp_config)
+        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}启用/禁用 UTP 功能', icon='textures/ui/toggle_on', on_click=self.reload_utp_function)
+        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}返回', icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
+        player.send_form(reload_config_data_form)
+
+    # 重载 UTP 全局配置
+    def reload_utp_config(self, player: Player):
         textinput1 = TextInput(
             label=f'{ColorFormat.GREEN}当前允许玩家拥有私人传送点个数： '
                   f'{ColorFormat.WHITE}{self.config_data["max_home_per_player"]}\n'
@@ -780,9 +828,9 @@ class utp(Plugin):
             default_value=f'{self.config_data["back_to_death_point_cool_down"]}'
         )
         reload_config_data_form = ModalForm(
-            title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}重载配置文件',
+            title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}重载 UTP 全局配置',
             controls=[textinput1, textinput2, textinput3, textinput4, textinput5],
-            on_close=self.back_to_main_form,
+            on_close=self.reload_config_data,
             submit_button=f'{ColorFormat.YELLOW}重载'
         )
         def on_submit(player: Player, json_str):
@@ -814,9 +862,64 @@ class utp(Plugin):
             self.config_data['tpr_protect_time'] = update_tpr_protect_time
             self.config_data['back_to_death_point_cool_down'] = update_back_to_death_point_cool_down
             self.save_config_data()
-            player.send_message(f'{ColorFormat.YELLOW}重载配置文件成功...')
+            player.send_message(f'{ColorFormat.YELLOW}重载 UTP 全局配置成功...')
         reload_config_data_form.on_submit = on_submit
         player.send_form(reload_config_data_form)
+
+    # 启用/禁用 UTP 功能
+    def reload_utp_function(self, player: Player):
+        toggle1 = Toggle(
+            label=f'{ColorFormat.GREEN}启用个人传送点',
+        )
+        if self.config_data['is_enable']['home']:
+            toggle1.default_value = True
+        else:
+            toggle1.default_value = False
+        toggle2 = Toggle(
+            label=f'{ColorFormat.GREEN}启用公共传送点',
+        )
+        if self.config_data['is_enable']['warp']:
+            toggle2.default_value = True
+        else:
+            toggle2.default_value = False
+        toggle3 = Toggle(
+            label=f'{ColorFormat.GREEN}启用玩家互传'
+        )
+        if self.config_data['is_enable']['tpa_and_tpahere']:
+            toggle3.default_value = True
+        else:
+            toggle3.default_value = False
+        toggle4 = Toggle(
+            label=f'{ColorFormat.GREEN}启用随机传送'
+        )
+        if self.config_data['is_enable']['tpr']:
+            toggle4.default_value = True
+        else:
+            toggle4.default_value = False
+        toggle5 = Toggle(
+            label=f'{ColorFormat.GREEN}启用返回上一死亡点'
+        )
+        if self.config_data['is_enable']['back']:
+            toggle5.default_value = True
+        else:
+            toggle5.default_value = False
+        reload_utp_function_form = ModalForm(
+            title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}启用/禁用 UTP 功能',
+            controls=[toggle1, toggle2, toggle3, toggle4, toggle5],
+            submit_button=f'{ColorFormat.YELLOW}重载',
+            on_close=self.reload_config_data
+        )
+        def on_submit(player: Player, json_str: str):
+            data = json.loads(json_str)
+            self.config_data['is_enable']['home'] = data[0]
+            self.config_data['is_enable']['warp'] = data[1]
+            self.config_data['is_enable']['tpa_and_tpahere'] = data[2]
+            self.config_data['is_enable']['tpr'] = data[3]
+            self.config_data['is_enable']['back'] = data[4]
+            self.save_config_data()
+            player.send_message(f'{ColorFormat.YELLOW}重载 UTP 功能启用状态成功...')
+        reload_utp_function_form.on_submit = on_submit
+        player.send_form(reload_utp_function_form)
 
     def save_config_data(self):
         with open(config_data_file_path, 'w+', encoding='utf-8') as f:
@@ -834,7 +937,6 @@ class utp(Plugin):
         if not self.home_data.get(event.player.name):
             self.home_data[event.player.name] = {}
             self.save_home_data()
-        # 这里因为 value 是 bool 值, 所以直接用 None 来检测, 而不是 not
         if self.tpa_setting_data.get(event.player.name) is None:
             self.tpa_setting_data[event.player.name] = True
             self.save_tpa_setting_data()

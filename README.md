@@ -8,9 +8,10 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
 
 ### Introductions
-* **Rich features:** `Home`, `Warp`, `TPA`, `TPAHere`, `TPASetting`, `TPR`, `Back` (back to the last death point.)
+* **Rich features:** `Home`, `Warp`, `TPA`, `TPAHere`, `TPSetting`, `TPR`, `Back` (back to the last death point.)
 * **Full GUI:** Beautiful GUI forms for easy operation rather than commands.
 * **Hot reload support:** Operators can edit/update `config.json` in game directly.
+* **Localized languages support**
 
 ### Installation
 Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
@@ -25,7 +26,10 @@ Plugins/
 │  ├─ config.json
 │  ├─ home.json
 │  ├─ warp.json
-│  ├─ tpa_setting.json
+│  ├─ tp_setting.json
+│  ├─ lang/
+│  │  ├─ zh_CN.json
+│  │  ├─ en_US.json
 ```
 
 ### Configuration
@@ -48,6 +52,15 @@ UTP allows operators or players to edit/update relevant settings through GUI for
     }
 }
 ```
+
+### Languages
+- [x] `zh_CN`
+- [x] `en_US`
+
+Off course you can add your mother language to UTP, just creat `XX_XX.json` (such as `ja_JP.json`) and translate value with reference to `en_US.json`.
+
+You can also creat a PR to this repo to make your mother language one of the official languages of UTP.
+
 
 ### Screenshots
 Due to the extreme ease of use of UTP, there is no wiki available. You can view related screenshots of UTP from images folder of this repo.

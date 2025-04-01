@@ -161,7 +161,7 @@ class utp(Plugin):
                 main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.close")}', icon='textures/ui/cancel', on_click=None)
             else:
                 main_form.on_close = self.back_to_menu
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.back_to_menu")}', icon='textures/ui/refresh_light', on_click=self.back_to_menu)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.back_to_zx_ui")}', icon='textures/ui/refresh_light', on_click=self.back_to_menu)
             if not player.is_op:
                 if len(main_form.buttons) == 1:
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "open_main_form.message.fail")}')

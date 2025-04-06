@@ -2,7 +2,7 @@ name: Update Clone Count
 
 on:
   schedule:
-    - cron: '40 8 * * *' 
+    - cron: '0 9 * * *'
 
 jobs:
   update-count:
@@ -10,12 +10,37 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Install jq
         run: sudo apt-get install -y jq
-      - name: Get clone count
+
+      - name: Get current total clone count from file
+        id: get-current-total
         run: |
-          CLONE_COUNT=$(curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones | jq -r '.count')
-          echo $CLONE_COUNT > clone_count.txt
+          CURRENT_TOTAL=$(cat clone_count.txt)
+          echo "current_total=$CURRENT_TOTAL" >> $GITHUB_OUTPUT
+
+      - name: Get today's clone count from API
+        id: get-today-count
+        run: |
+          TODAY=$(date -u +"%Y-%m-%d")
+          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones)
+          TODAY_CLONE_COUNT=$(echo "$RESPONSE" | jq -r --arg today "$TODAY" '.clones[] | select(.timestamp | startswith($today)) | .count')
+          if [ -z "$TODAY_CLONE_COUNT" ]; then
+            TODAY_CLONE_COUNT=0
+          fi
+          echo "today_clone_count=$TODAY_CLONE_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Calculate new total clone count
+        id: calculate-new-total
+        run: |
+          NEW_TOTAL=$((${steps.get-current-total.outputs.current_total} + ${steps.get-today-count.outputs.today_clone_count}))
+          echo "new_total=$NEW_TOTAL" >> $GITHUB_OUTPUT
+
+      - name: Write new total clone count to file
+        run: |
+          echo "${steps.calculate-new-total.outputs.new_total}" > clone_count.txt
+
       - name: Commit and push
         run: |
           git config --local user.email "action@github.com"

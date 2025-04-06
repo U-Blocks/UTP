@@ -6,6 +6,7 @@
 
 [![Minecraft - Version](https://img.shields.io/badge/minecraft-v1.21.60_(Bedrock)-black)](https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs)
 [![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
+![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/UTP@master/clone_count.txt&color=brightgreen)
 
 ### Introductions
 * **Rich features:** `Home`, `Warp`, `TPA`, `TPAHere`, `TPSetting`, `TPR`, `Back` (back to the last death point.)

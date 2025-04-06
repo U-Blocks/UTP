@@ -2,7 +2,7 @@ name: Update Clone Count
 
 on:
   schedule:
-    - cron: '40 10 * * *'
+    - cron: '0 11 * * *'
 
 jobs:
   update-count:
@@ -63,7 +63,7 @@ jobs:
 
       - name: Write new total clone count to file
         run: |
-          echo "${steps.calculate-new-total.outputs.new_total}" > clone_count.txt
+          echo "${calculate-new-total__new_total}" > clone_count.txt
 
       - name: Commit and push
         run: |

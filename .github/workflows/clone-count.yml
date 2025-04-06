@@ -31,25 +31,25 @@ jobs:
           current_total=$(cat clone_count.txt)
           echo "current_total=$current_total" >> $GITHUB_OUTPUT
 
-      - name: Get today's clone count from API
-        id: get-today-count
+      - name: Get yesterday's clone count from API
+        id: get-yesterday-count
         run: |
-          today=$(date -u +"%Y-%m-%d")
+          yesterday=$(date -u -d "yesterday" +"%Y-%m-%d")
           response=$(curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/traffic/clones")
-          today_clone_count=$(echo "$response" | jq -r --arg today "$today" \
-            '(.clones // [])[] | select(.timestamp | startswith($today)) | .count')
-          if [ -z "$today_clone_count" ]; then
-            today_clone_count=0
+          yesterday_clone_count=$(echo "$response" | jq -r --arg yesterday "$yesterday" \
+            '(.clones // [])[] | select(.timestamp | startswith($yesterday)) | .count')
+          if [ -z "$yesterday_clone_count" ]; then
+            yesterday_clone_count=0
           fi
-          echo "Today's clone count: $today_clone_count"
+          echo "Yesterday's clone count: $yesterday_clone_count"
           echo "API response: $response"
-          echo "today_clone_count=$today_clone_count" >> $GITHUB_OUTPUT
+          echo "yesterday_clone_count=$yesterday_clone_count" >> $GITHUB_OUTPUT
 
       - name: Calculate new total clone count
         id: calculate-new-total
         run: |
-          new_total=$((${{ steps.get-current-total.outputs.current_total }} + ${{ steps.get-today-count.outputs.today_clone_count }}))
+          new_total=$((${{ steps.get-current-total.outputs.current_total }} + ${{ steps.get-yesterday-count.outputs.yesterday_clone_count }}))
           echo "new_total=$new_total" >> $GITHUB_OUTPUT
 
       - name: Write new total clone count to file
@@ -66,4 +66,4 @@ jobs:
             git push
           else
             echo "No changes to commit."
-          fi    
+          fi

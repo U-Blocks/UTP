@@ -2,7 +2,7 @@ name: Update Clone Count
 
 on:
   schedule:
-    - cron: '0 8 * * *' 
+    - cron: '40 8 * * *' 
 
 jobs:
   update-count:
@@ -14,7 +14,7 @@ jobs:
         run: sudo apt-get install -y jq
       - name: Get clone count
         run: |
-          CLONE_COUNT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones | jq -r '.count')
+          CLONE_COUNT=$(curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones | jq -r '.count')
           echo $CLONE_COUNT > clone_count.txt
       - name: Commit and push
         run: |

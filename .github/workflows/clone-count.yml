@@ -2,7 +2,7 @@ name: Update Clone Count
 
 on:
   schedule:
-    - cron: '35 15 * * *' 
+    - cron: '41 15 * * *' 
 
 jobs:
   update-count:

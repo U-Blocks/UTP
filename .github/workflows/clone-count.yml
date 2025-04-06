@@ -1,7 +1,9 @@
 name: Update Clone Count
 
 on:
+  # 支持手动触发
   workflow_dispatch:
+  # 每天执行一次
   schedule:
     - cron: '0 0 * * *'
 
@@ -47,12 +49,12 @@ jobs:
       - name: Calculate new total clone count
         id: calculate-new-total
         run: |
-          new_total=$((${get-current-total.outputs.current_total} + ${get-today-count.outputs.today_clone_count}))
+          new_total=$((${{ steps.get-current-total.outputs.current_total }} + ${{ steps.get-today-count.outputs.today_clone_count }}))
           echo "new_total=$new_total" >> $GITHUB_OUTPUT
 
       - name: Write new total clone count to file
         run: |
-          echo "${calculate-new-total.outputs.new_total}" > clone_count.txt
+          echo "${{ steps.calculate-new-total.outputs.new_total }}" > clone_count.txt
 
       - name: Commit and push changes
         run: |
@@ -64,4 +66,4 @@ jobs:
             git push
           else
             echo "No changes to commit."
-          fi
+          fi    

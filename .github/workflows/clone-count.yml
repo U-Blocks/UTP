@@ -1,32 +1,21 @@
 name: Update Clone Count
 
 on:
-  # 支持手动触发
   workflow_dispatch:
   schedule:
-    - cron: '55 11 * * *'
+    - cron: '0 0 * * *'
 
 jobs:
-  update-count:
+  update-clone-count:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Cache jq installation
-        id: cache-jq
-        uses: actions/cache@v3
-        with:
-          path: /usr/bin/jq
-          key: ${{ runner.os }}-jq
 
       - name: Install jq
-        if: steps.cache-jq.outputs.cache-hit != 'true'
-        run: sudo apt-get install -y jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Set default clone count if file not exists
+      - name: Initialize clone count file
         run: |
           if [ ! -f clone_count.txt ]; then
             echo "0" > clone_count.txt
@@ -36,101 +25,43 @@ jobs:
             exit 1
           fi
 
-      - name: Get current total clone count from file
+      - name: Get current total clone count
         id: get-current-total
         run: |
-          CURRENT_TOTAL=$(cat clone_count.txt)
-          if [ $? -ne 0 ]; then
-            echo "Failed to read clone_count.txt. Exit code: $?"
-            exit 1
-          fi
-          if ! [[ "$CURRENT_TOTAL" =~ ^[0-9]+$ ]]; then
-            echo "Error: Content of clone_count.txt is not a valid number."
-            exit 1
-          fi
-          echo "current_total=$CURRENT_TOTAL" >> $GITHUB_OUTPUT
+          current_total=$(cat clone_count.txt)
+          echo "current_total=$current_total" >> $GITHUB_OUTPUT
 
       - name: Get today's clone count from API
         id: get-today-count
         run: |
-          TODAY=$(date -u +"%Y-%m-%d")
-          RESPONSE=$(curl -s -D /tmp/response_headers --retry 3 --retry-delay 5 -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones)
-          if [ $? -ne 0 ]; then
-            echo "Failed to call GitHub API. Exit code: $?"
-            cat /tmp/response_headers
-            exit 1
+          today=$(date -u +"%Y-%m-%d")
+          response=$(curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/traffic/clones")
+          today_clone_count=$(echo "$response" | jq -r --arg today "$today" \
+            '(.clones // [])[] | select(.timestamp | startswith($today)) | .count')
+          if [ -z "$today_clone_count" ]; then
+            today_clone_count=0
           fi
-          echo "API Response: $RESPONSE"
-          if echo "$RESPONSE" | jq -e '.message' >/dev/null 2>&1; then
-            echo "GitHub API returned an error: $(echo "$RESPONSE" | jq -r '.message')"
-            exit 1
-          fi
-          TODAY_CLONE_COUNT=$(echo "$RESPONSE" | jq -r --arg today "$TODAY" '(.clones // [])[] | select(.timestamp | startswith($today)) | .count')
-          if [ $? -ne 0 ]; then
-            echo "Failed to parse API response with jq. Exit code: $?"
-            exit 1
-          fi
-          if ! [[ "$TODAY_CLONE_COUNT" =~ ^[0-9]+$ ]]; then
-            echo "Error: Today's clone count is not a valid number."
-            exit 1
-          fi
-          echo "Today's Clone Count: $TODAY_CLONE_COUNT"
-          if [ -z "$TODAY_CLONE_COUNT" ]; then
-            TODAY_CLONE_COUNT=0
-          fi
-          echo "today_clone_count=$TODAY_CLONE_COUNT" >> $GITHUB_OUTPUT
+          echo "today_clone_count=$today_clone_count" >> $GITHUB_OUTPUT
 
       - name: Calculate new total clone count
         id: calculate-new-total
         run: |
-          if ! [[ "${get-current-total__current_total}" =~ ^[0-9]+$ ]]; then
-            echo "Error: get-current-total__current_total is not a valid number."
-            exit 1
-          fi
-          if ! [[ "${get-today-count__today_clone_count}" =~ ^[0-9]+$ ]]; then
-            echo "Error: get-today-count__today_clone_count is not a valid number."
-            exit 1
-          fi
-          NEW_TOTAL=$((${get-current-total__current_total} + ${get-today-count__today_clone_count}))
-          echo "Calculated NEW_TOTAL: $NEW_TOTAL"
-          echo "new_total=$NEW_TOTAL" >> $GITHUB_OUTPUT
+          new_total=$((${get-current-total.outputs.current_total} + ${get-today-count.outputs.today_clone_count}))
+          echo "new_total=$new_total" >> $GITHUB_OUTPUT
 
       - name: Write new total clone count to file
         run: |
-          echo "${calculate-new-total__new_total}" > clone_count.txt
-          echo "Written new total clone count to file: ${calculate-new-total__new_total}"
+          echo "${calculate-new-total.outputs.new_total}" > clone_count.txt
 
-      - name: Commit and push
+      - name: Commit and push changes
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
             git add clone_count.txt
             git commit -m "Update clone count"
-            if [ $? -ne 0 ]; then
-              echo "Failed to commit changes. Exit code: $?"
-              exit 1
-            fi
-            PUSH_RETRIES=3
-            for ((i = 0; i < PUSH_RETRIES; i++)); do
-              git push
-              if [ $? -eq 0 ]; then
-                echo "Successfully pushed changes."
-                break
-              fi
-              if [ $i -lt $((PUSH_RETRIES - 1)) ]; then
-                echo "Push failed, retrying in 5 seconds..."
-                sleep 5
-              else
-                echo "Failed to push changes after $PUSH_RETRIES attempts. Exit code: $?"
-                exit 1
-              fi
-            done
+            git push
           else
             echo "No changes to commit."
           fi
-
-      - name: Handle workflow failure
-        if: failure()
-        run: |
-          echo "Workflow failed. Please check the logs for details."

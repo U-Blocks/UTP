@@ -2,7 +2,7 @@ name: Update Clone Count
 
 on:
   schedule:
-    - cron: '0 9 * * *'
+    - cron: '50 9 * * *'
 
 jobs:
   update-count:
@@ -24,8 +24,8 @@ jobs:
         id: get-today-count
         run: |
           TODAY=$(date -u +"%Y-%m-%d")
-          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones)
-          TODAY_CLONE_COUNT=$(echo "$RESPONSE" | jq -r --arg today "$TODAY" '.clones[] | select(.timestamp | startswith($today)) | .count')
+          RESPONSE=$(curl -s --retry 3 --retry-delay 5 -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones)
+          TODAY_CLONE_COUNT=$(echo "$RESPONSE" | jq -r --arg today "$TODAY" '(.clones // [])[] | select(.timestamp | startswith($today)) | .count')
           if [ -z "$TODAY_CLONE_COUNT" ]; then
             TODAY_CLONE_COUNT=0
           fi
@@ -43,8 +43,12 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add clone_count.txt
-          git commit -m "Update clone count"
-          git push
+          if [[ -n $(git status --porcelain) ]]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add clone_count.txt
+            git commit -m "Update clone count"
+            git push
+          else
+            echo "No changes to commit."
+          fi

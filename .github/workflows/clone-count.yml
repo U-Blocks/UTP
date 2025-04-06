@@ -1,0 +1,27 @@
+name: Update Clone Count
+
+on:
+  # 每天执行一次该任务
+  schedule:
+    - cron: '0 0 * * *' 
+
+jobs:
+  update-count:
+    runs-on: ubuntu-latest
+    steps:
+      # 检出仓库代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+      # 获取克隆次数
+      - name: Get clone count
+        run: |
+          CLONE_COUNT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/traffic/clones | jq -r '.count')
+          echo $CLONE_COUNT > clone_count.txt
+      # 提交并推送克隆次数文件
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add clone_count.txt
+          git commit -m "Update clone count"
+          git push

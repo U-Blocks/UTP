@@ -30,7 +30,7 @@ class utp(Plugin):
     api_version = '0.6'
 
     def on_enable(self):
-        # 加载 home 数据
+        # Load home data
         if not os.path.exists(home_data_file_path):
             home_data = {}
             with open(home_data_file_path, 'w', encoding='utf-8') as f:
@@ -41,7 +41,7 @@ class utp(Plugin):
                 home_data = json.loads(f.read())
         self.home_data = home_data
 
-        # 加载 warp 数据
+        # Load warp data
         if not os.path.exists(warp_data_file_path):
             warp_data = {}
             with open(warp_data_file_path, 'w', encoding='utf-8') as f:
@@ -52,7 +52,7 @@ class utp(Plugin):
                 warp_data = json.loads(f.read())
         self.warp_data = warp_data
 
-        # 加载 TPA & TPAHere 个人设置数据
+        # Load TPSetting data
         if not os.path.exists(tp_setting_file_path):
             tp_setting_data = {}
             with open(tp_setting_file_path, 'w', encoding='utf-8') as f:
@@ -63,10 +63,7 @@ class utp(Plugin):
                 tp_setting_data = json.loads(f.read())
         self.tp_setting_data = tp_setting_data
 
-        # 加载 lang 数据
-        self.lang_data = lang.load_lang(self, lang_dir)
-
-        # 加载 config 数据
+        # Load config data
         if not os.path.exists(config_data_file_path):
             config_data = {
                 'max_home_per_player': 5,
@@ -87,28 +84,12 @@ class utp(Plugin):
                 f.write(json_str)
         else:
             with open(config_data_file_path, 'r', encoding='utf-8') as f:
-                pre_config_data = json.loads(f.read())
-            if pre_config_data.get('max_home_per_player') is None:
-                pre_config_data['max_home_per_player'] = 5
-            if pre_config_data.get('tpr_range') is None:
-                pre_config_data['tpr_range'] = 2000
-            if pre_config_data.get('tpr_cool_down') is None:
-                pre_config_data['tpr_cool_down'] = 60
-            if pre_config_data.get('tpr_protect_time') is None:
-                pre_config_data['tpr_protect_time'] = 20
-            if pre_config_data.get('back_to_death_point_cool_down') is None:
-                pre_config_data['back_to_death_point_cool_down'] = 30
-            if pre_config_data.get('is_enable') is None:
-                pre_config_data['is_enable'] = {
-                    'home': True,
-                    'warp': True,
-                    'tpa_and_tpahere': True,
-                    'tpr': True,
-                    'back': True
-                }
-            config_data = pre_config_data
+                config_data = json.loads(f.read())
         self.config_data = config_data
-        self.save_config_data()
+
+        # Load lang data
+        self.lang_data = lang.load_lang(self, lang_dir)
+
         self.sender_wrapper = CommandSenderWrapper(
             self.server.command_sender,
             on_message=None
@@ -133,10 +114,10 @@ class utp(Plugin):
         }
     }
 
-    def on_command(self, sender: CommandSender, command: Command, args: list[str]):
+    def on_command(self, sender: CommandSender, command: Command, args: list[str]) -> None:
         if command.name == 'utp':
             if not isinstance(sender, Player):
-                sender.send_message(f'{ColorFormat.RED}该命令只能由玩家执行...')
+                sender.send_message(f'{ColorFormat.RED}This command can only be executed by a player...')
                 return
             player = sender
             main_form = ActionForm(
@@ -144,50 +125,60 @@ class utp(Plugin):
                 content=f'{ColorFormat.GREEN}{self.get_text(player, "main_form.content")}',
             )
             if self.config_data['is_enable']['home']:
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.home")}', icon='textures/items/ender_pearl', on_click=self.home)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.home")}',
+                                     icon='textures/items/ender_pearl', on_click=self.home)
             if self.config_data['is_enable']['warp']:
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.warp")}', icon='textures/ui/worldsIcon', on_click=self.warp)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.warp")}',
+                                     icon='textures/ui/worldsIcon', on_click=self.warp)
             if self.config_data['is_enable']['tpa_and_tpahere']:
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.tpa_and_tpahere")}', icon='textures/ui/dressing_room_customization', on_click=self.tpa_and_tpahere)
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.tp_setting")}', icon='textures/ui/icon_setting', on_click=self.tp_setting)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.tpa_and_tpahere")}',
+                                     icon='textures/ui/dressing_room_customization', on_click=self.tpa_and_tpahere)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.tp_setting")}',
+                                     icon='textures/ui/icon_setting', on_click=self.tp_setting)
             if self.config_data['is_enable']['tpr']:
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.tpr")}', icon='textures/ui/icon_random', on_click=self.tpr)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.tpr")}',
+                                     icon='textures/ui/icon_random', on_click=self.tpr)
             if self.config_data['is_enable']['back']:
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.back")}', icon='textures/ui/friend_glyph_desaturated', on_click=self.back_to_last_death_point)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.back")}',
+                                     icon='textures/ui/friend_glyph_desaturated', on_click=self.back_to_last_death_point)
             if player.is_op:
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.reload")}', icon='textures/ui/icon_setting', on_click=self.reload_config_data)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.reload")}',
+                                     icon='textures/ui/icon_setting', on_click=self.reload_config_data)
             if not os.path.exists(menu_file_path):
                 main_form.on_close = None
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.close")}', icon='textures/ui/cancel', on_click=None)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.close")}',
+                                     icon='textures/ui/cancel', on_click=None)
             else:
                 main_form.on_close = self.back_to_menu
-                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.back_to_zx_ui")}', icon='textures/ui/refresh_light', on_click=self.back_to_menu)
+                main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.back_to_zx_ui")}',
+                                     icon='textures/ui/refresh_light', on_click=self.back_to_menu)
             if not player.is_op:
                 if len(main_form.buttons) == 1:
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "open_main_form.message.fail")}')
                     return
             player.send_form(main_form)
 
-    # home 主表单
-    def home(self, player: Player):
+    # Home
+    def home(self, player: Player) -> None:
         home_form = ActionForm(
             title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}{self.get_text(player, "home_form.title")}',
             content=f'{ColorFormat.GREEN}{self.get_text(player, "home_form.content")}...',
             on_close=self.back_to_main_form
         )
-        home_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_form.button.addhome")}', icon='textures/ui/color_plus', on_click=self.add_home)
-        for key, value in self.home_data[player.name].items():
-            home_name = key
-            home_info = value
+        home_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_form.button.addhome")}',
+                             icon='textures/ui/color_plus', on_click=self.add_home)
+        for home_name, home_info in self.home_data[player.name].items():
             home_loc = home_info['loc']
             home_dim = home_info['dim']
             home_form.add_button(f'{ColorFormat.WHITE}{home_name}\n'
-                                 f'{ColorFormat.YELLOW}[{self.get_text(player, "dimension")}]: {home_dim}', icon='textures/items/ender_eye', on_click=self.home_info(home_name, home_loc, home_dim))
-        home_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_main_form")}', icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
+                                 f'{ColorFormat.YELLOW}[{self.get_text(player, "dimension")}]: {home_dim}',
+                                 icon='textures/items/ender_eye', on_click=self.home_info(home_name, home_loc, home_dim))
+        home_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                             icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
         player.send_form(home_form)
 
-    # 添加脚下坐标为传送点
-    def add_home(self, player: Player):
+    # Add home
+    def add_home(self, player: Player) -> None:
         home_player_already_has = [key for key in self.home_data[player.name].keys()]
         if len(home_player_already_has) >= self.config_data['max_home_per_player']:
             player.send_message(f'{ColorFormat.RED}{self.get_text(player, "addhome.message.fail")}: {ColorFormat.WHITE}'
@@ -207,7 +198,7 @@ class utp(Plugin):
             on_close=self.home,
             submit_button=f'{ColorFormat.YELLOW}{self.get_text(player, "addhome_form.submit_button")}'
         )
-        def on_submit(player: Player, json_str):
+        def on_submit(player: Player, json_str: str):
             data = json.loads(json_str)
             if len(data[0]) == 0:
                 player.send_message(f'{ColorFormat.RED}{self.get_text(player, "message.type_error")}')
@@ -226,7 +217,7 @@ class utp(Plugin):
         add_home_form.on_submit = on_submit
         player.send_form(add_home_form)
 
-    # 单个 home 详细信息
+    # Home info
     def home_info(self, home_name, home_loc, home_dim):
         def on_click(player: Player):
             home_info_form = ActionForm(
@@ -234,13 +225,16 @@ class utp(Plugin):
                 content=f'{ColorFormat.GREEN}{self.get_text(player, "home_info_form.content")}',
                 on_close=self.home
             )
-            home_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_info_form.button.tp")}', icon='textures/ui/realmsIcon', on_click=self.home_tp(home_loc, home_dim))
-            home_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_info_form.button.edithome")}', icon='textures/ui/hammer_l', on_click=self.home_edit(home_name, home_loc, home_dim))
-            home_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_home_form")}', icon='textures/ui/refresh_light', on_click=self.home)
+            home_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_info_form.button.tp")}',
+                                      icon='textures/ui/realmsIcon', on_click=self.home_tp(home_loc, home_dim))
+            home_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_info_form.button.edithome")}',
+                                      icon='textures/ui/hammer_l', on_click=self.home_edit(home_name, home_loc, home_dim))
+            home_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                      icon='textures/ui/refresh_light', on_click=self.home)
             player.send_form(home_info_form)
         return on_click
 
-    # home 编辑
+    # Home edit
     def home_edit(self, home_name, home_loc, home_dim):
         def on_click(player: Player):
             home_edit_form = ActionForm(
@@ -248,27 +242,33 @@ class utp(Plugin):
                 content=f'{ColorFormat.GREEN}{self.get_text(player, "edithome_form.content")}',
                 on_close=self.home
             )
-            home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "edithome_form.button.updatehome")}', icon='textures/ui/refresh', on_click=self.home_update(home_name, home_loc, home_dim))
-            home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "edithome_form.button.deletehome")}', icon='textures/ui/cancel', on_click=self.home_delte(home_name, home_loc, home_dim))
-            home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_home_form")}', icon='textures/ui/refresh_light', on_click=self.home)
+            home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "edithome_form.button.updatehome")}',
+                                      icon='textures/ui/refresh', on_click=self.home_update(home_name, home_loc, home_dim))
+            home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "edithome_form.button.deletehome")}',
+                                      icon='textures/ui/cancel', on_click=self.home_delte(home_name, home_loc, home_dim))
+            home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                      icon='textures/ui/refresh_light', on_click=self.home)
             player.send_form(home_edit_form)
         return on_click
 
-    # home 更新
-    def home_update(self, home_name, home_loc, home_dim):
+    # Home update
+    def home_update(self, home_name):
         def on_click(player: Player):
             home_update_form = ActionForm(
                 title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}{self.get_text(player, "updatehome_form.title")}: {home_name}',
                 content=f'{ColorFormat.GREEN}{self.get_text(player, "updatehome_form.content")}',
                 on_close=self.home,
             )
-            home_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatehome_form.button.renamehome")}', icon='textures/ui/icon_book_writable', on_click=self.home_update_name(home_name))
-            home_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatehome_form.button.updatelocation")}', icon='textures/ui/realmsIcon', on_click=self.home_update_tp(home_name))
-            home_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_home_form")}', icon='textures/ui/refresh_light', on_click=self.home)
+            home_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatehome_form.button.renamehome")}',
+                                        icon='textures/ui/icon_book_writable', on_click=self.home_update_name(home_name))
+            home_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatehome_form.button.updatelocation")}',
+                                        icon='textures/ui/realmsIcon', on_click=self.home_update_tp(home_name))
+            home_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                        icon='textures/ui/refresh_light', on_click=self.home)
             player.send_form(home_update_form)
         return on_click
 
-    # home 重命名
+    # Home rename
     def home_update_name(self, home_name):
         def on_click(player: Player):
             textinput = TextInput(
@@ -282,7 +282,7 @@ class utp(Plugin):
                 submit_button=f'{ColorFormat.YELLOW}{self.get_text(player, "renamehome_form.submit_button")}',
                 on_close=self.home
             )
-            def on_submit(player: Player, json_str):
+            def on_submit(player: Player, json_str: str):
                 data = json.loads(json_str)
                 if len(data[0]) == 0:
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "message.type_error")}')
@@ -303,7 +303,7 @@ class utp(Plugin):
             player.send_form(home_update_name_form)
         return on_click
 
-    # home 更新传送点位置
+    # Home teleport point update
     def home_update_tp(self, home_name):
         def on_click(player: Player):
             new_home_loc = [int(player.location.x), int(player.location.y), int(player.location.z)]
@@ -315,12 +315,14 @@ class utp(Plugin):
                         f'{ColorFormat.GREEN}[{self.get_text(player, "dimension")}]: {ColorFormat.WHITE}{new_home_dim}',
                 on_close=self.home
             )
-            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_updatelocation_form.button.confirm")}', icon='textures/ui/realms_slot_check', on_click=self.on_confirm(home_name, new_home_loc, new_home_dim))
-            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_home_form")}', icon='textures/ui/refresh_light', on_click=self.home)
+            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "home_updatelocation_form.button.confirm")}',
+                                    icon='textures/ui/realms_slot_check', on_click=self.home_update_tp_confirm(home_name, new_home_loc, new_home_dim))
+            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                    icon='textures/ui/refresh_light', on_click=self.home)
             player.send_form(confirm_form)
         return on_click
 
-    def on_confirm(self, home_name, new_home_loc, new_home_dim):
+    def home_update_tp_confirm(self, home_name, new_home_loc, new_home_dim):
         def on_click(player: Player):
             self.home_data[player.name][home_name]['loc'] = new_home_loc
             self.home_data[player.name][home_name]['dim'] = new_home_dim
@@ -328,7 +330,7 @@ class utp(Plugin):
             player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "home_updatelocation.message.success")}')
         return on_click
 
-    # home 删除
+    # Home delete
     def home_delte(self, home_name, home_loc, home_dim):
         def on_click(player: Player):
              confirm_form = ActionForm(
@@ -338,19 +340,21 @@ class utp(Plugin):
                          f'{ColorFormat.GREEN}[{self.get_text(player, "dimension")}]: {ColorFormat.WHITE}{home_dim}',
                  on_close=self.home
              )
-             confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "deletehome_form.button.confirm")}', icon='textures/ui/realms_slot_check', on_click=self.on_confirm_two(home_name))
-             confirm_form.add_button(f'{ColorFormat.YELLOW}{ColorFormat.YELLOW}{self.get_text(player, "back_to_home_form")}', icon='textures/ui/refresh_light', on_click=self.home)
+             confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "deletehome_form.button.confirm")}',
+                                     icon='textures/ui/realms_slot_check', on_click=self.home_delte_confirm(home_name))
+             confirm_form.add_button(f'{ColorFormat.YELLOW}{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                     icon='textures/ui/refresh_light', on_click=self.home)
              player.send_form(confirm_form)
         return on_click
 
-    def on_confirm_two(self, home_name):
+    def home_delte_confirm(self, home_name):
         def on_click(player: Player):
             self.home_data[player.name].pop(home_name)
             self.save_home_data()
             player.send_message(f'{ColorFormat.YELLOW}{ColorFormat.YELLOW}{self.get_text(player, "deletehome.message.success")}')
         return on_click
 
-    # home 传送点传送
+    # Home teleport
     def home_tp(self, home_loc, home_dim):
         def on_click(player: Player):
             if home_dim == 'Overworld':
@@ -369,34 +373,34 @@ class utp(Plugin):
             player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "tphome.message.success")}')
         return on_click
 
-    # 保存 home.json 数据
-    def save_home_data(self):
+    # Save home data
+    def save_home_data(self) -> None:
         with open(home_data_file_path, 'w+', encoding='utf-8') as f:
             json_str = json.dumps(self.home_data, indent=4, ensure_ascii=False)
             f.write(json_str)
 
-    # warp 主表单
-    def warp(self, player: Player):
+    # Warp
+    def warp(self, player: Player) -> None:
         warp_form = ActionForm(
             title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}{self.get_text(player, "warp_form.title")}',
             content=f'{ColorFormat.GREEN}{self.get_text(player, "warp_form.content")}',
             on_close=self.back_to_main_form
         )
-        if player.is_op == True:
-            warp_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_form.button.addwarp")}', icon='textures/ui/color_plus', on_click=self.add_warp)
-        for key, value in self.warp_data.items():
-            warp_name = key
-            warp_info = value
+        if player.is_op:
+            warp_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_form.button.addwarp")}',
+                                 icon='textures/ui/color_plus', on_click=self.add_warp)
+        for warp_name, warp_info in self.warp_data.items():
             warp_loc = warp_info['loc']
             warp_dim = warp_info['dim']
             warp_form.add_button(f'{ColorFormat.WHITE}{warp_name}\n'
                                  f'{ColorFormat.YELLOW}[{self.get_text(player, "dimension")}]: {warp_dim}',
                                  icon='textures/items/ender_eye', on_click=self.warp_info(warp_name, warp_loc, warp_dim))
-        warp_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_main_form")}', icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
+        warp_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                             icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
         player.send_form(warp_form)
 
-    # 将脚下坐标添加为新的 warp
-    def add_warp(self, player: Player):
+    # Add warp
+    def add_warp(self, player: Player) -> None:
         warp_loc = [int(player.location.x), int(player.location.y), int(player.location.z)]
         warp_dim = player.dimension.name
         textinput = TextInput(
@@ -411,7 +415,7 @@ class utp(Plugin):
             on_close=self.warp,
             submit_button=f'{ColorFormat.YELLOW}{self.get_text(player, "addwarp_form.submit_button")}'
         )
-        def on_submit(player: Player, json_str):
+        def on_submit(player: Player, json_str: str):
             data = json.loads(json_str)
             if len(data[0]) == 0:
                 player.send_message(f'{ColorFormat.RED}{self.get_text(player, "message.type_error")}')
@@ -431,7 +435,7 @@ class utp(Plugin):
         add_warp_form.on_submit = on_submit
         player.send_form(add_warp_form)
 
-    # 单个 warp 详细信息
+    # Warp info
     def warp_info(self, warp_name, warp_loc, warp_dim):
         def on_click(player: Player):
             warp_info_form = ActionForm(
@@ -439,14 +443,17 @@ class utp(Plugin):
                 content=f'{ColorFormat.GREEN}{self.get_text(player, "warp_info_form.content")}',
                 on_close=self.warp
             )
-            warp_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_info_form.button.tp")}', icon='textures/ui/realmsIcon', on_click=self.warp_tp(warp_loc, warp_dim))
+            warp_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_info_form.button.tp")}',
+                                      icon='textures/ui/realmsIcon', on_click=self.warp_tp(warp_loc, warp_dim))
             if player.is_op:
-                warp_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_info_form.button.editwarp")}', icon='textures/ui/hammer_l', on_click=self.warp_edit(warp_name, warp_loc, warp_dim))
-            warp_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_warp_form")}', icon='textures/ui/refresh_light', on_click=self.warp)
+                warp_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_info_form.button.editwarp")}',
+                                          icon='textures/ui/hammer_l', on_click=self.warp_edit(warp_name, warp_loc, warp_dim))
+            warp_info_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                      icon='textures/ui/refresh_light', on_click=self.warp)
             player.send_form(warp_info_form)
         return on_click
 
-    # warp 传送
+    # Warp teleport
     def warp_tp(self, warp_loc, warp_dim):
         def on_click(player: Player):
             if warp_dim == 'Overworld':
@@ -465,7 +472,7 @@ class utp(Plugin):
             player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "tpwarp.message.success")}')
         return on_click
 
-    # warp 编辑
+    # Warp edit
     def warp_edit(self, warp_name, warp_loc, warp_dim):
         def on_click(player: Player):
             warp_edit_form = ActionForm(
@@ -473,27 +480,33 @@ class utp(Plugin):
                 content=f'{ColorFormat.GREEN}{self.get_text(player, "editwarp_form.content")}',
                 on_close=self.warp
             )
-            warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "editwarp_form.button.updatewarp")}', icon='textures/ui/refresh', on_click=self.warp_update(warp_name, warp_loc, warp_dim))
-            warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "editwarp_form.button.deletewarp")}', icon='textures/ui/cancel', on_click=self.warp_delete(warp_name, warp_loc, warp_dim))
-            warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_warp_form")}', icon='textures/ui/refresh_light', on_click=self.warp)
+            warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "editwarp_form.button.updatewarp")}',
+                                      icon='textures/ui/refresh', on_click=self.warp_update(warp_name, warp_loc, warp_dim))
+            warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "editwarp_form.button.deletewarp")}',
+                                      icon='textures/ui/cancel', on_click=self.warp_delete(warp_name, warp_loc, warp_dim))
+            warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                      icon='textures/ui/refresh_light', on_click=self.warp)
             player.send_form(warp_edit_form)
         return on_click
 
-    # warp 更新
-    def warp_update(self, warp_name, warp_loc, warp_dim):
+    # Warp update
+    def warp_update(self, warp_name):
         def on_click(player: Player):
             warp_update_form = ActionForm(
                 title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}{self.get_text(player, "updatewarp_form.title")}: {warp_name}',
                 content=f'{ColorFormat.GREEN}{self.get_text(player, "updatewarp_form.content")}',
                 on_close=self.warp
             )
-            warp_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatewarp_form.button.renamewarp")}', icon='textures/ui/icon_book_writable', on_click=self.warp_update_name(warp_name))
-            warp_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatewarp_form.button.updatelocation")}', icon='textures/ui/realmsIcon', on_click=self.warp_update_tp(warp_name))
-            warp_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_warp_form")}', icon='textures/ui/refresh_light', on_click=self.warp)
+            warp_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatewarp_form.button.renamewarp")}',
+                                        icon='textures/ui/icon_book_writable', on_click=self.warp_update_name(warp_name))
+            warp_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "updatewarp_form.button.updatelocation")}',
+                                        icon='textures/ui/realmsIcon', on_click=self.warp_update_tp(warp_name))
+            warp_update_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                        icon='textures/ui/refresh_light', on_click=self.warp)
             player.send_form(warp_update_form)
         return on_click
 
-    # warp 重命名
+    # Warp rename
     def warp_update_name(self, warp_name):
         def on_click(player: Player):
             textinput = TextInput(
@@ -507,7 +520,7 @@ class utp(Plugin):
                 on_close=self.warp,
                 submit_button=f'{ColorFormat.YELLOW}{self.get_text(player, "renamewarp_form.submit_button")}'
             )
-            def on_submit(player: Player, json_str):
+            def on_submit(player: Player, json_str: str):
                 data = json.loads(json_str)
                 if len(data[0]) == 0:
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "message.type_error")}')
@@ -528,7 +541,7 @@ class utp(Plugin):
             player.send_form(warp_update_name)
         return on_click
 
-    # warp 更新传送坐标和维度
+    # Warp teleport point update
     def warp_update_tp(self, warp_name):
         def on_click(player: Player):
             new_warp_loc = [int(player.location.x), int(player.location.y), int(player.location.z)]
@@ -540,13 +553,14 @@ class utp(Plugin):
                         f'{ColorFormat.GREEN}[{self.get_text(player, "dimension")}]: {ColorFormat.WHITE}{new_warp_dim}',
                 on_close=self.warp
             )
-            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_updatelocation_form.button.confirm")}', icon='textures/ui/realms_slot_check',
-                                    on_click=self.on_confirm_four(warp_name, new_warp_loc, new_warp_dim))
-            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_warp_form")}', icon='textures/ui/refresh_light', on_click=self.warp)
+            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_updatelocation_form.button.confirm")}',
+                                    icon='textures/ui/realms_slot_check', on_click=self.warp_update_tp_confirm(warp_name, new_warp_loc, new_warp_dim))
+            confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                    icon='textures/ui/refresh_light', on_click=self.warp)
             player.send_form(confirm_form)
         return on_click
     
-    def on_confirm_four(self, warp_name, new_warp_loc, new_warp_dim):
+    def warp_update_tp_confirm(self, warp_name, new_warp_loc, new_warp_dim):
         def on_click(player: Player):
             self.warp_data[warp_name]['loc'] = new_warp_loc
             self.warp_data[warp_name]['dim'] = new_warp_dim
@@ -554,7 +568,7 @@ class utp(Plugin):
             player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "warp_updatelocation.message.success")}')
         return on_click
 
-    # warp 删除
+    # Warp delete
     def warp_delete(self, warp_name, warp_loc, warp_dim):
         def on_click(player: Player):
              confirm_form = ActionForm(
@@ -564,8 +578,10 @@ class utp(Plugin):
                          f'{ColorFormat.GREEN}[{self.get_text(player, "dimension")}]: {ColorFormat.WHITE}{warp_dim}',
                  on_close=self.warp
              )
-             confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "deletewarp_form.button.confirm")}', icon='textures/ui/realms_slot_check', on_click=self.warp_delete_confirm(warp_name))
-             confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_warp_form")}', icon='textures/ui/refresh_light', on_click=self.warp)
+             confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "deletewarp_form.button.confirm")}',
+                                     icon='textures/ui/realms_slot_check', on_click=self.warp_delete_confirm(warp_name))
+             confirm_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                     icon='textures/ui/refresh_light', on_click=self.warp)
              player.send_form(confirm_form)
         return on_click
 
@@ -576,21 +592,21 @@ class utp(Plugin):
             player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "deletewarp.message.success")}')
         return on_click
 
-    # 保存 warp 数据
-    def save_warp_data(self):
+    # Save warp data
+    def save_warp_data(self) -> None:
         with open(warp_data_file_path, 'w+', encoding='utf-8') as f:
             json_str = json.dumps(self.warp_data, indent=4, ensure_ascii=False)
             f.write(json_str)
 
     # TPA & TPAHere
-    def tpa_and_tpahere(self, player: Player):
-        # 获取屏蔽 TPA & TPAHere 的玩家列表
+    def tpa_and_tpahere(self, player: Player) -> None:
+        # Get the list of players' name who have block TPA & TPAHere.
         tpa_deny_player_list = []
         for key, value in self.tp_setting_data.items():
             if not value:
                 tpa_deny_player_list.append(key)
         online_player_list = []
-        # 筛选出可用于 TPA & TPAHere 的玩家列表
+        # Filter out the list of players' name available for TPA & TPAHere
         for online_player in self.server.online_players:
             if online_player.name != player.name:
                 if online_player.name not in tpa_deny_player_list:
@@ -613,48 +629,52 @@ class utp(Plugin):
             on_close=self.back_to_main_form,
             submit_button=f'{ColorFormat.YELLOW}{self.get_text(player, "tpa_and_tpahere_form.submit_button")}'
         )
-        def on_submit(player: Player, json_str):
+        def on_submit(player: Player, json_str: str):
             data = json.loads(json_str)
             request_player_name = player.name
             target_player_name = online_player_list[data[0]]
             mode = mode_list[data[1]]
             if mode == 'tpa':
-                # 判断 TPA 目标玩家是否在线
+                # Check whether the target player for TPA request is online.
                 if not self.server.get_player(target_player_name):
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "tpa.message.fail_1")}: {ColorFormat.WHITE}' +
                                         self.get_text(player, "tpa_and_tpahere.message.fail.reason.offline").format(target_player_name))
                     return
                 else:
-                    # 向 TPA 发起玩家发送提示信息
+                    # Send a prompt message to the player who initiated the TPA request.
                     player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "tpa.message.success")}')
-                    # 向 TPA 目标玩家发送表单
+                    # Send a form to the target player for TPA request.
                     target_player = self.server.get_player(target_player_name)
                     tpa_form = ActionForm(
                         title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}{self.get_text(target_player, "tpa_form.title")}',
                         content=ColorFormat.GREEN + self.get_text(target_player, "tpa_form.content").format(player.name),
                         on_close=self.tpa_denny(request_player_name)
                     )
-                    tpa_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpa_form.button.accept")}', icon='textures/ui/realms_slot_check', on_click=self.tpa_accept(request_player_name))
-                    tpa_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpa_form.button.deny")}', icon='textures/ui/cancel', on_click=self.tpa_denny(request_player_name))
+                    tpa_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpa_form.button.accept")}',
+                                        icon='textures/ui/realms_slot_check', on_click=self.tpa_accept(request_player_name))
+                    tpa_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpa_form.button.deny")}',
+                                        icon='textures/ui/cancel', on_click=self.tpa_denny(request_player_name))
                     target_player.send_form(tpa_form)
             else:
-                # 判断 TPAHere 目标玩家是否在线
+                # Check whether the target player for TPAHere request is online.
                 if not self.server.get_player(target_player_name):
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "tpahere.message.fail_1")}: {ColorFormat.WHITE}' +
                                         self.get_text(player, "tpa_and_tpahere.message.fail.reason.offline").format(target_player_name))
                     return
                 else:
-                    # 向 TPAHere 发起玩家发送提示信息
+                    # Send a prompt message to the player who initiated the TPAHere request.
                     player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "tpahere.message.success")}')
-                    # 向 TPAHere 目标玩家发送表单
+                    # Send a form to the target player for TPAHere request.
                     target_player = self.server.get_player(target_player_name)
                     tpahere_form = ActionForm(
                         title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}{self.get_text(target_player, "tpahere_form.title")}',
                         content=ColorFormat.GREEN + self.get_text(target_player, "tpahere_form.content").format(player.name),
                         on_close=self.tpahere_denny(request_player_name)
                     )
-                    tpahere_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpahere_form.button.accept")}', icon='textures/ui/realms_slot_check', on_click=self.tpahere_accept(request_player_name))
-                    tpahere_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpahere_form.button.deny")}', icon='textures/ui/cancel', on_click=self.tpahere_denny(request_player_name))
+                    tpahere_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpahere_form.button.accept")}',
+                                            icon='textures/ui/realms_slot_check', on_click=self.tpahere_accept(request_player_name))
+                    tpahere_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(target_player, "tpahere_form.button.deny")}',
+                                            icon='textures/ui/cancel', on_click=self.tpahere_denny(request_player_name))
                     target_player.send_form(tpahere_form)
         tpa_and_tpahere_form.on_submit = on_submit
         player.send_form(tpa_and_tpahere_form)
@@ -662,7 +682,7 @@ class utp(Plugin):
     # TPA - accept
     def tpa_accept(self, request_player_name):
         def on_click(target_player: Player):
-            # 判断 TPA 发起玩家是否离线
+            # Check whether the player who initiated the TPA request is offline.
             if not self.server.get_player(request_player_name):
                 target_player.send_message(f'{ColorFormat.RED}{self.get_text(target_player, "tpa.message.fail_2")}: {ColorFormat.WHITE}' +
                                            self.get_text(target_player, "tpa_and_tpahere.message.fail.reason.offline").format(request_player_name))
@@ -675,7 +695,7 @@ class utp(Plugin):
     # TPA - deny
     def tpa_denny(self, request_player_name):
         def on_click(target_player: Player):
-            # 判断 TPA 发起玩家是否离线
+            # Check whether the player who initiated the TPA request is offline.
             if not self.server.get_player(request_player_name):
                 return None
             else:
@@ -687,7 +707,7 @@ class utp(Plugin):
     # TPAHere - accept
     def tpahere_accept(self, request_player_name):
         def on_click(target_player: Player):
-            # 判断 TPAHere 发起玩家是否离线
+            # Check whether the player who initiated the TPAHere request is offline.
             if not self.server.get_player(request_player_name):
                 target_player.send_message(f'{ColorFormat.RED}{self.get_text(target_player, "tpahere.message.fail_2")}: {ColorFormat.WHITE}' +
                                            self.get_text(target_player, "tpa_and_tpahere.message.fail.reason.offline").format(request_player_name))
@@ -700,7 +720,7 @@ class utp(Plugin):
     # TPAHere - deny
     def tpahere_denny(self, request_player_name):
         def on_click(target_player: Player):
-            # 判断 TPAHere 发起玩家是否离线
+            # Check whether the player who initiated the TPA request is offline.
             if not self.server.get_player(request_player_name):
                 return None
             else:
@@ -709,8 +729,8 @@ class utp(Plugin):
                 return None
         return on_click
 
-    # TPA & TPAHere - 个人设置
-    def tp_setting(self, player: Player):
+    # TP setting (TPA & TPAHere)
+    def tp_setting(self, player: Player) -> None:
         toggle = Toggle(
             label=f'{ColorFormat.YELLOW}{self.get_text(player, "tpsetting_form.toggle.lable")}'
         )
@@ -724,7 +744,7 @@ class utp(Plugin):
             on_close=self.back_to_main_form,
             submit_button=f'{ColorFormat.YELLOW}{self.get_text(player, "tpsetting_form.submit_button")}'
         )
-        def on_submit(player: Player, json_str):
+        def on_submit(player: Player, json_str: str):
             data = json.loads(json_str)
             if data[0]:
                 update_tp_setting = True
@@ -736,14 +756,14 @@ class utp(Plugin):
         tp_setting_form.on_submit = on_submit
         player.send_form(tp_setting_form)
 
-    # 保存 TPA & TPAHere 个人设置数据
-    def save_tp_setting_data(self):
+    # Save TP setting data
+    def save_tp_setting_data(self) -> None:
         with open(tp_setting_file_path, 'w+', encoding='utf-8') as f:
             json_str = json.dumps(self.tp_setting_data, indent=4, ensure_ascii=False)
             f.write(json_str)
 
     # TPR
-    def tpr(self, player: Player):
+    def tpr(self, player: Player) -> None:
         if not self.record_tpr.get(player.name):
             pass
         else:
@@ -768,7 +788,7 @@ class utp(Plugin):
             online_player.send_message(f'{ColorFormat.YELLOW}[{self.get_text(online_player, "tpr.message.success_1")}]: {ColorFormat.WHITE}'
                                        + self.get_text(online_player, "tpr.message.success_2").format(player.name))
 
-    # 监听玩家死亡事件
+    # Monitor the players' death.
     @event_handler
     def on_player_death(self, event: PlayerDeathEvent):
         player_death_time = time.time()
@@ -780,8 +800,8 @@ class utp(Plugin):
             'death_dim': player_death_dim
         }
 
-    # back 返回上一死亡点
-    def back_to_last_death_point(self, player: Player):
+    # Back to the last death point.
+    def back_to_last_death_point(self, player: Player) -> None:
         if not self.record_death.get(player.name):
             player.send_message(f'{ColorFormat.RED}{self.get_text(player, "back.message.fail")}: '
                                 f'{ColorFormat.WHITE}{self.get_text(player, "back.message.fail.reason")}')
@@ -811,20 +831,23 @@ class utp(Plugin):
                                     f'{ColorFormat.WHITE}{self.get_text(player, "back.message.fail.reason")}')
                 return
 
-    # 重载配置文件
-    def reload_config_data(self, player: Player):
+    # Reload configurations
+    def reload_config_data(self, player: Player) -> None:
         reload_config_data_form = ActionForm(
             title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}{self.get_text(player, "config_form.title")}',
             content=f'{ColorFormat.GREEN}{self.get_text(player, "config_form.content")}',
             on_close=self.back_to_main_form
         )
-        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "config_form.button.utp_config")}', icon='textures/ui/icon_setting', on_click=self.reload_utp_config)
-        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "config_form.button.utp_toggle")}', icon='textures/ui/toggle_on', on_click=self.reload_utp_function)
-        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "back_to_main_form")}', icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
+        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "config_form.button.utp_config")}',
+                                           icon='textures/ui/icon_setting', on_click=self.reload_utp_config)
+        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "config_form.button.utp_toggle")}',
+                                           icon='textures/ui/toggle_on', on_click=self.reload_utp_function)
+        reload_config_data_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
+                                           icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
         player.send_form(reload_config_data_form)
 
-    # 重载 UTP 全局配置
-    def reload_utp_config(self, player: Player):
+    # Reload global configurations
+    def reload_utp_config(self, player: Player) -> None:
         textinput1 = TextInput(
             label=f'{ColorFormat.GREEN}{self.get_text(player, "utp_config_form.textinput_1.label")}: '
                   f'{ColorFormat.WHITE}{self.config_data["max_home_per_player"]}',
@@ -861,29 +884,29 @@ class utp(Plugin):
             on_close=self.reload_config_data,
             submit_button=f'{ColorFormat.YELLOW}{self.get_text(player, "utp_config_form.submit_button")}'
         )
-        def on_submit(player: Player, json_str):
+        def on_submit(player: Player, json_str: str):
             data = json.loads(json_str)
-            # 判断所有 textinput 是否被填写
             for i in range(len(data)):
                 if len(data[i]) == 0:
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "message.type_error")}')
                     return
-            # 判断所有 textinput 是否填写了正确的数字类型
+
             try:
                 update_max_home_per_player = int(data[0])
                 update_tpr_range = int(data[1])
                 update_tpr_cool_down = int(data[2])
                 update_tpr_protect_time = int(data[3])
                 update_back_to_death_point_cool_down = int(data[4])
-            except:
+            except ValueError:
                 player.send_message(f'{ColorFormat.RED}{self.get_text(player, "message.type_error")}')
                 return
+
             if (update_max_home_per_player <= 0 or update_tpr_range <= 0
                     or update_tpr_cool_down <= 0 or update_tpr_protect_time <=0
                     or update_back_to_death_point_cool_down <= 0):
                 player.send_message(f'{ColorFormat.RED}{self.get_text(player, "message.type_error")}')
                 return
-            # 写入新配置
+
             self.config_data['max_home_per_player'] = update_max_home_per_player
             self.config_data['tpr_range'] = update_tpr_range
             self.config_data['tpr_cool_down'] = update_tpr_cool_down
@@ -894,8 +917,8 @@ class utp(Plugin):
         reload_config_data_form.on_submit = on_submit
         player.send_form(reload_config_data_form)
 
-    # 启用/禁用 UTP 功能
-    def reload_utp_function(self, player: Player):
+    # Toggle on/off functions of UTP
+    def reload_utp_function(self, player: Player) -> None:
         toggle1 = Toggle(
             label=f'{ColorFormat.GREEN}{self.get_text(player, "utp_toggle_form.toggle_1.label")}',
         )
@@ -949,33 +972,34 @@ class utp(Plugin):
         reload_utp_function_form.on_submit = on_submit
         player.send_form(reload_utp_function_form)
 
-    # 保存 config 数据
-    def save_config_data(self):
+    # Save config data
+    def save_config_data(self) -> None:
         with open(config_data_file_path, 'w+', encoding='utf-8') as f:
             json_str = json.dumps(self.config_data, indent=4, ensure_ascii=False)
             f.write(json_str)
 
-    # 返回至 ZX_UI
-    def back_to_menu(self, player: Player):
+    def back_to_menu(self, player: Player) -> None:
         player.perform_command('cd')
 
-    # 返回至 UTP 主表单
-    def back_to_main_form(self, player: Player):
+    def back_to_main_form(self, player: Player) -> None:
         player.perform_command('utp')
 
-    # 获取文本
-    def get_text(self, player: Player, text_key: str):
+    # Get text
+    def get_text(self, player: Player, text_key: str) -> str:
         lang = player.locale
-        if self.lang_data.get(lang) is None:
-            text_value = self.lang_data['en_US'][text_key]
-        else:
-            if self.lang_data[lang].get(text_key) is None:
+        try:
+            if self.lang_data.get(lang) is None:
                 text_value = self.lang_data['en_US'][text_key]
             else:
-                text_value = self.lang_data[lang][text_key]
-        return text_value
+                if self.lang_data[lang].get(text_key) is None:
+                    text_value = self.lang_data['en_US'][text_key]
+                else:
+                    text_value = self.lang_data[lang][text_key]
+            return text_value
+        except:
+            return text_key
 
-    # 监听玩家加入服务器事件
+    # Monitor players' joining server.
     @event_handler
     def on_player_join(self, event: PlayerJoinEvent):
         if not self.home_data.get(event.player.name):

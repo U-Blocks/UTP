@@ -10,9 +10,7 @@ class lang():
             zh_CN = {
                 'open_main_form.message.fail': 'UTP 的所有功能已被管理员禁用...',
                 'message.type_error': '表单解析错误, 请按提示正确填写...',
-                'back_to_main_form': '返回',
-                'back_to_home_form': '返回',
-                'back_to_warp_form': '返回',
+                'button.back': '返回',
                 'coordinates': '坐标',
                 'dimension': '维度',
                 'main_form.title': '传送合集主表单',
@@ -178,9 +176,7 @@ class lang():
             en_US = {
                 'open_main_form.message.fail': 'All functions of UTP have been disabled by operators...',
                 'message.type_error': 'The form is parsed incorrectly, please follow the prompts to fill in correctly...',
-                'back_to_main_form': 'Back to main form',
-                'back_to_home_form': 'Back to home form',
-                'back_to_warp_form': 'Back to warp form',
+                'button.back': 'Back to previous',
                 'coordinates': 'Coordinates',
                 'dimension': 'Dimension',
 

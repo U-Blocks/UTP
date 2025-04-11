@@ -97,7 +97,7 @@ class utp(Plugin):
         self.record_tpr = {}
         self.record_death = {}
         self.register_events(self)
-        self.logger.info(f'{ColorFormat.YELLOW}UTP 已加载...')
+        self.logger.info(f'{ColorFormat.YELLOW}UTP is enabled...')
 
     commands = {
         'utp': {
@@ -243,7 +243,7 @@ class utp(Plugin):
                 on_close=self.home
             )
             home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "edithome_form.button.updatehome")}',
-                                      icon='textures/ui/refresh', on_click=self.home_update(home_name, home_loc, home_dim))
+                                      icon='textures/ui/refresh', on_click=self.home_update(home_name))
             home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "edithome_form.button.deletehome")}',
                                       icon='textures/ui/cancel', on_click=self.home_delte(home_name, home_loc, home_dim))
             home_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',
@@ -481,7 +481,7 @@ class utp(Plugin):
                 on_close=self.warp
             )
             warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "editwarp_form.button.updatewarp")}',
-                                      icon='textures/ui/refresh', on_click=self.warp_update(warp_name, warp_loc, warp_dim))
+                                      icon='textures/ui/refresh', on_click=self.warp_update(warp_name))
             warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "editwarp_form.button.deletewarp")}',
                                       icon='textures/ui/cancel', on_click=self.warp_delete(warp_name, warp_loc, warp_dim))
             warp_edit_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "button.back")}',

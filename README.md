@@ -10,7 +10,7 @@
 ![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/UTP@master/clone_count.txt&color=brightgreen)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/umarurize/UTP/total)
 
-### Introductions
+### :bell:Introductions
 * **Rich features:**
 - [x] Home
 - [x] Warp
@@ -23,13 +23,13 @@
 * **Hot reload support:** Operators can edit/update `config.json` in game directly.
 * **Localized languages support**
 
-### Installation
+### :hammer:Installation
 Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
 
-### Download
+### :computer:Download
 Now, you can get the release version form this repo or <code><a href="https://www.minebbs.com/resources/utp.10159/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt="Minebbs" /></a>&nbsp;Minebbs</code>.
 
-### File structure
+### :file_folder:File structure
 ```
 Plugins/
 ├─ utp/
@@ -42,7 +42,7 @@ Plugins/
 │  │  ├─ en_US.json
 ```
 
-### Configuration
+### :pencil:Configuration
 UTP allows operators or players to edit/update relevant settings through GUI forms with ease, here are just simple explanations for these configurations.
 
 `config.json`
@@ -63,7 +63,7 @@ UTP allows operators or players to edit/update relevant settings through GUI for
 }
 ```
 
-### Languages
+### :globe_with_meridians:Languages
 - [x] `zh_CN`
 - [x] `en_US`
 
@@ -72,7 +72,7 @@ Off course you can add your mother language to UTP, just creat `XX_XX.json` (suc
 You can also creat a PR to this repo to make your mother language one of the official languages of UTP.
 
 
-### Screenshots
+### :camera:Screenshots
 Due to the extreme ease of use of UTP, there is no wiki available. You can view related screenshots of UTP from images folder of this repo.
 
 ![](https://img.shields.io/badge/language-python-blue.svg) [![GitHub License](https://img.shields.io/github/license/umarurize/UTP)](LICENSE)

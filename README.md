@@ -6,10 +6,19 @@
 
 [![Minecraft - Version](https://img.shields.io/badge/minecraft-v1.21.60_(Bedrock)-black)](https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs)
 [![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
+
 ![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/UTP@master/clone_count.txt&color=brightgreen)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/umarurize/UTP/total)
 
 ### Introductions
-* **Rich features:** `Home`, `Warp`, `TPA`, `TPAHere`, `TPSetting`, `TPR`, `Back` (back to the last death point.)
+* **Rich features:**
+- [x] Home
+- [x] Warp
+- [x] TPA
+- [x] TPAHere
+- [x] TPSetting
+- [x] TPR
+- [x] Back (back to the last death point.)
 * **Full GUI:** Beautiful GUI forms for easy operation rather than commands.
 * **Hot reload support:** Operators can edit/update `config.json` in game directly.
 * **Localized languages support**
@@ -37,7 +46,7 @@ Plugins/
 UTP allows operators or players to edit/update relevant settings through GUI forms with ease, here are just simple explanations for these configurations.
 
 `config.json`
-```json
+```json5
 {
     "max_home_per_player": 10,  // the max number of homes a player can posses
     "tpr_range": 2000,  // the max random teleportation range

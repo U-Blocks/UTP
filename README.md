@@ -6,21 +6,30 @@
 
 [![Minecraft - Version](https://img.shields.io/badge/minecraft-v1.21.60_(Bedrock)-black)](https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs)
 [![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
-![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/UTP@master/clone_count.txt&color=brightgreen)
 
-### Introductions
-* **Rich features:** `Home`, `Warp`, `TPA`, `TPAHere`, `TPSetting`, `TPR`, `Back` (back to the last death point.)
+![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/UTP@master/clone_count.txt&color=brightgreen)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/umarurize/UTP/total)
+
+### :bell:Introductions
+* **Rich features:**
+- [x] Home
+- [x] Warp
+- [x] TPA
+- [x] TPAHere
+- [x] TPSetting
+- [x] TPR
+- [x] Back (back to the last death point.)
 * **Full GUI:** Beautiful GUI forms for easy operation rather than commands.
 * **Hot reload support:** Operators can edit/update `config.json` in game directly.
 * **Localized languages support**
 
-### Installation
+### :hammer:Installation
 Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
 
-### Download
+### :computer:Download
 Now, you can get the release version form this repo or <code><a href="https://www.minebbs.com/resources/utp.10159/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt="Minebbs" /></a>&nbsp;Minebbs</code>.
 
-### File structure
+### :file_folder:File structure
 ```
 Plugins/
 ├─ utp/
@@ -33,11 +42,11 @@ Plugins/
 │  │  ├─ en_US.json
 ```
 
-### Configuration
+### :pencil:Configuration
 UTP allows operators or players to edit/update relevant settings through GUI forms with ease, here are just simple explanations for these configurations.
 
 `config.json`
-```json
+```json5
 {
     "max_home_per_player": 10,  // the max number of homes a player can posses
     "tpr_range": 2000,  // the max random teleportation range
@@ -54,7 +63,7 @@ UTP allows operators or players to edit/update relevant settings through GUI for
 }
 ```
 
-### Languages
+### :globe_with_meridians:Languages
 - [x] `zh_CN`
 - [x] `en_US`
 
@@ -63,7 +72,7 @@ Off course you can add your mother language to UTP, just creat `XX_XX.json` (suc
 You can also creat a PR to this repo to make your mother language one of the official languages of UTP.
 
 
-### Screenshots
+### :camera:Screenshots
 Due to the extreme ease of use of UTP, there is no wiki available. You can view related screenshots of UTP from images folder of this repo.
 
 ![](https://img.shields.io/badge/language-python-blue.svg) [![GitHub License](https://img.shields.io/github/license/umarurize/UTP)](LICENSE)

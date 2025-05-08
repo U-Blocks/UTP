@@ -26,8 +26,9 @@ tp_setting_file_path = os.path.join(first_dir, 'tp_setting.json')
 config_data_file_path = os.path.join(first_dir, 'config.json')
 menu_file_path = os.path.join('plugins', 'zx_ui')
 
+
 class utp(Plugin):
-    api_version = '0.6'
+    api_version = '0.7'
 
     def on_enable(self):
         # Load home data
@@ -153,7 +154,11 @@ class utp(Plugin):
                 main_form.add_button(f'{ColorFormat.YELLOW}{self.get_text(player, "main_form.button.back_to_zx_ui")}',
                                      icon='textures/ui/refresh_light', on_click=self.back_to_menu)
             if not player.is_op:
-                if len(main_form.buttons) == 1:
+                function_enable_num = 0
+                for function_status in self.config_data['is_enable'].values():
+                    if function_status:
+                        function_enable_num += 1
+                if function_enable_num == 0:
                     player.send_message(f'{ColorFormat.RED}{self.get_text(player, "open_main_form.message.fail")}')
                     return
             player.send_form(main_form)

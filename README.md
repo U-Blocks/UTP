@@ -19,6 +19,7 @@
 - [x] TPSetting
 - [x] TPR
 - [x] Back (back to the last death point.)
+- [x] Home & Warp navigation (distance and yaw angle)
 * **Full GUI:** Beautiful GUI forms for easy operation rather than commands.
 * **Hot reload support:** Operators can edit/update `config.json` in game directly.
 * **Localized languages support**
@@ -50,9 +51,10 @@ UTP allows operators or players to edit/update relevant settings through GUI for
 {
     "max_home_per_player": 10,  // the max number of homes a player can posses
     "tpr_range": 2000,  // the max random teleportation range
-    "tpr_cool_down": 60,  // the cooldown time for calling the random teleportation
-    "tpr_protect_time": 25,  // the protection time after calling the random teleportation
-    "back_to_death_point_cool_down": 60  // the cooldown time for calling the back
+    "tpr_cool_down": 60,  // the cooldown time in seconds for calling the random teleportation
+    "tpr_protect_time": 25,  // the protection time in seconds after calling the random teleportation
+    "back_valid_time": 60  // the valid time in seconds for calling the back
+    "navigation_valid_time": 300  // the valid time in seconds for every single navigation
     "is_enable": {
         "home": true,
         "warp": true,

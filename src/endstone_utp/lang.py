@@ -155,6 +155,7 @@ class lang():
                 'utp_config_form.textinput_3.label': '当前随机传送的冷却时间',
                 'utp_config_form.textinput_4.label': '当前随机传送的保护时间',
                 'utp_config_form.textinput_5.label': '当前返回上一死亡点的有效时间',
+                'utp_config_form.textinput_6.label': '当前导航有效时间',
                 'utp_config_form.submit_button': '重载',
                 'utp_config.message.success': '重载全局配置成功...',
 
@@ -167,6 +168,19 @@ class lang():
                 'utp_toggle_form.submit_button': '重载',
                 'utp_toggle.message.success': '重载功能启用状态成功...',
 
+                'navigate': '导航',
+                'arrive': '抵达目的地...',
+                'overtime': '导航超时...',
+                'destination': '目的地',
+                'type': '类型',
+                'distance': '距离',
+                'time_remain': '剩余时长',
+                'yaw_angle': '偏航角',
+                'start_navigation.message.success': '开启新导航成功...',
+                'start_navigation.message.fail': '开启新导航失败',
+                'start_navigation.message.fail.reason_1': '你不能跨纬度导航...',
+                'start_navigation.message.fail.reason_2': '{0} 正在导航中...',
+                'navigation.message.cancel': '导航已被自动取消...',
             }
             with open(lang_zh_CN_data_file_path, 'w', encoding='utf-8') as f:
                 json_str = json.dumps(zh_CN, indent=4, ensure_ascii=False)
@@ -322,6 +336,7 @@ class lang():
                 'utp_config_form.textinput_3.label': 'The current cooldown time of TPR',
                 'utp_config_form.textinput_4.label': 'The current protection time of TPR',
                 'utp_config_form.textinput_5.label': 'The current valid time of Back',
+                'utp_config_form.textinput_6.label': 'The current valid time of navigation',
                 'utp_config_form.submit_button': 'Reload',
                 'utp_config.message.success': 'Successfully reload global configurations...',
 
@@ -333,6 +348,20 @@ class lang():
                 'utp_toggle_form.toggle_5.label': 'Allow Back',
                 'utp_toggle_form.submit_button': 'Reload',
                 'utp_toggle.message.success': 'Successfully reload the enabling status of functions...',
+
+                'navigate': 'Navigate',
+                'arrive': 'Arrived...',
+                'overtime': 'Overtime...',
+                'destination': 'Destination',
+                'distance': 'Distance',
+                'time_remain': 'Time remain',
+                'yaw_angle': 'Yaw angle',
+                'type': 'Type',
+                'start_navigation.message.success': 'Successfully start a new navigation...',
+                'start_navigation.message.fail': 'Failed to start a new navigation',
+                'start_navigation.message.fail.reason_1': 'you cannot navigate across dimensions...',
+                'start_navigation.message.fail.reason_2': '{0} is on navigation...',
+                'navigation.message.cancel': 'Navigation has been auto canceled...',
 
 
             }

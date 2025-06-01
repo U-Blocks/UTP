@@ -62,6 +62,44 @@ UTP allows operators or players to edit/update relevant settings through GUI for
 }
 ```
 
+`home.json`
+```json5
+{
+    "umaru rize": {    // Home owner
+        "test home": { // Home name
+            "loc": [    // Home coordinates
+                -285,
+                49,
+                -250
+            ],
+            "dim": "Nether"    // Home dimension
+        }
+    }
+}
+```
+
+`warp.json`
+```json5
+{
+    "test warp": {    // Warp name
+        "loc": [    // Warp coordinates
+            437,
+            71,
+            249
+        ],
+        "dim": "Overworld"    // Warp dimension
+    }
+}
+```
+
+`tp_setting.json`
+```json5
+{
+    "umaru rize": true,    // if false, TPA or TPAHere requests from other players will be blocked
+    "handaozhang520": true
+}
+```
+
 ### :globe_with_meridians:Languages
 - [x] `zh_CN`
 - [x] `en_US`

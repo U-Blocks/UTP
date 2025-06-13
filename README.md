@@ -24,7 +24,8 @@
 
 ### :hammer:Installation
 [Optional pre-plugin] ZX_UI
-[Optional pre-plugin] UMoney
+
+[Required pre-plugin] [UMoney](https://github.com/umarurize/UMoney)
 
 Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
 

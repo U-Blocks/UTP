@@ -11,7 +11,7 @@ from endstone.event import event_handler, PlayerJoinEvent, PlayerDeathEvent, Pla
 from endstone.command import Command, CommandSender, CommandSenderWrapper
 from endstone.form import ActionForm, ModalForm, Dropdown, TextInput, Toggle
 
-from endstone_utp.lang import lang
+from endstone_utp.lang import load_langs
 
 current_dir = os.getcwd()
 
@@ -27,7 +27,6 @@ home_data_file_path = os.path.join(first_dir, 'home.json')
 warp_data_file_path = os.path.join(first_dir, 'warp.json')
 tp_setting_file_path = os.path.join(first_dir, 'tp_setting.json')
 config_data_file_path = os.path.join(first_dir, 'config.json')
-menu_file_path = os.path.join('plugins', 'zx_ui')
 
 
 class utp(Plugin):
@@ -89,12 +88,15 @@ class utp(Plugin):
                 'tpr_protect_time': 20,
                 'back_valid_time': 30,
                 'navigation_valid_time': 300,
+                'death_penalty_money': 500,
+                'death_penalty_money_threshold': 10000,
                 'is_enable': {
                     'home': True,
                     'warp': True,
                     'tpa_and_tpahere': True,
                     'tpr': True,
-                    'back': True
+                    'back': True,
+                    'death_penalty': False
                 }
             }
             with open(config_data_file_path, 'w', encoding='utf-8') as f:
@@ -110,7 +112,7 @@ class utp(Plugin):
         self.config_data = config_data
 
         # Load lang data
-        self.lang_data = lang.load_lang(self, lang_dir)
+        self.langs = load_langs(lang_dir)
 
         self.record_tpr = {}
         self.record_death = {}
@@ -216,7 +218,7 @@ class utp(Plugin):
                     on_click=self.reload_config_data
                 )
 
-            if not os.path.exists(menu_file_path):
+            if self.server.plugin_manager.get_plugin('ZX_UI') is None:
                 main_form.on_close = None
 
                 main_form.add_button(
@@ -1620,6 +1622,24 @@ class utp(Plugin):
             'death_dim': player_death_dim
         }
 
+        if (
+            self.server.plugin_manager.get_plugin('umoney') is not None
+            and
+            self.config_data['is_enable']['death_penalty']
+        ):
+            player_money = self.server.plugin_manager.get_plugin('umoney').api_get_player_money(event.player.name)
+
+            if player_money >= self.config_data['death_penalty_money_threshold']:
+                event.player.send_message(
+                    f'{ColorFormat.RED}'
+                    f'{self.get_text(event.player, "death_penalty.message")}'
+                )
+
+                self.server.plugin_manager.get_plugin('umoney').api_change_player_money(
+                    event.player.name,
+                    -self.config_data['death_penalty_money']
+                )
+
     # Back to the last death point.
     def back_to_last_death_point(self, player: Player) -> None:
         if not self.record_death.get(player.name):
@@ -1753,6 +1773,24 @@ class utp(Plugin):
             default_value=f'{self.config_data["navigation_valid_time"]}'
         )
 
+        textinput7 = TextInput(
+            label=f'{ColorFormat.GREEN}'
+                  f'{self.get_text(player, "utp_config_form.textinput_7.label")}: '
+                  f'{ColorFormat.WHITE}'
+                  f'{self.config_data["death_penalty_money"]}',
+            placeholder=f'{self.get_text(player, "utp_config_form.textinput.placeholder")}',
+            default_value=f'{self.config_data["death_penalty_money"]}'
+        )
+
+        textinput8 = TextInput(
+            label=f'{ColorFormat.GREEN}'
+                  f'{self.get_text(player, "utp_config_form.textinput_8.label")}: '
+                  f'{ColorFormat.WHITE}'
+                  f'{self.config_data["death_penalty_money_threshold"]}',
+            placeholder=f'{self.get_text(player, "utp_config_form.textinput.placeholder")}',
+            default_value=f'{self.config_data["death_penalty_money_threshold"]}'
+        )
+
         reload_config_data_form = ModalForm(
             title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}'
                   f'{self.get_text(player, "utp_config_form.title")}',
@@ -1762,14 +1800,16 @@ class utp(Plugin):
                 textinput3,
                 textinput4,
                 textinput5,
-                textinput6
+                textinput6,
+                textinput7,
+                textinput8
             ],
             on_close=self.reload_config_data,
             submit_button=f'{ColorFormat.YELLOW}'
                           f'{self.get_text(player, "utp_config_form.submit_button")}'
         )
 
-        def on_submit(player: Player, json_str: str):
+        def on_submit(p: Player, json_str: str):
             data = json.loads(json_str)
 
             for i in range(len(data)):
@@ -1787,8 +1827,10 @@ class utp(Plugin):
                 update_tpr_protect_time = int(data[3])
                 update_back_valid_time = int(data[4])
                 update_navigation_valid_time = int(data[5])
+                update_death_penalty_money = int(data[6])
+                update_death_penalty_money_threshold = int(data[7])
             except ValueError:
-                player.send_message(
+                p.send_message(
                     f'{ColorFormat.RED}'
                     f'{self.get_text(player, "message.type_error")}'
                 )
@@ -1801,13 +1843,17 @@ class utp(Plugin):
                     or
                     update_tpr_cool_down <= 0
                     or
-                    update_tpr_protect_time <=0
+                    update_tpr_protect_time <= 0
                     or
                     update_back_valid_time <= 0
                     or
                     update_navigation_valid_time <= 0
+                    or
+                    update_death_penalty_money <= 0
+                    or
+                    update_death_penalty_money_threshold <= 0
             ):
-                player.send_message(
+                p.send_message(
                     f'{ColorFormat.RED}'
                     f'{self.get_text(player, "message.type_error")}'
                 )
@@ -1819,9 +1865,11 @@ class utp(Plugin):
             self.config_data['tpr_protect_time'] = update_tpr_protect_time
             self.config_data['back_valid_time'] = update_back_valid_time
             self.config_data['navigation_valid_time'] = update_navigation_valid_time
+            self.config_data['death_penalty_money'] = update_death_penalty_money
+            self.config_data['death_penalty_money_threshold'] = update_death_penalty_money_threshold
             self.save_config_data()
 
-            player.send_message(
+            p.send_message(
                 f'{ColorFormat.YELLOW}'
                 f'{self.get_text(player, "utp_config.message.success")}'
             )
@@ -1877,16 +1925,32 @@ class utp(Plugin):
         else:
             toggle5.default_value = False
 
+        toggle6 = Toggle(
+            label=f'{ColorFormat.GREEN}'
+                  f'{self.get_text(player, "utp_toggle_form.toggle_6.label")}'
+        )
+        if self.config_data['is_enable']['death_penalty']:
+            toggle6.default_value = True
+        else:
+            toggle6.default_value = False
+
         reload_utp_function_form = ModalForm(
             title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}'
                   f'{self.get_text(player, "utp_toggle_form.title")}',
-            controls=[toggle1, toggle2, toggle3, toggle4, toggle5],
+            controls=[
+                toggle1,
+                toggle2,
+                toggle3,
+                toggle4,
+                toggle5,
+                toggle6
+            ],
             submit_button=f'{ColorFormat.YELLOW}'
                           f'{self.get_text(player, "utp_toggle_form.submit_button")}',
             on_close=self.reload_config_data
         )
 
-        def on_submit(player: Player, json_str: str):
+        def on_submit(p: Player, json_str: str):
             data = json.loads(json_str)
 
             self.config_data['is_enable']['home'] = data[0]
@@ -1894,9 +1958,10 @@ class utp(Plugin):
             self.config_data['is_enable']['tpa_and_tpahere'] = data[2]
             self.config_data['is_enable']['tpr'] = data[3]
             self.config_data['is_enable']['back'] = data[4]
+            self.config_data['is_enable']['death_penalty'] = data[5]
             self.save_config_data()
 
-            player.send_message(
+            p.send_message(
                 f'{ColorFormat.YELLOW}'
                 f'{self.get_text(player, "utp_toggle.message.success")}'
             )
@@ -1923,16 +1988,23 @@ class utp(Plugin):
     # Get text
     def get_text(self, player: Player, text_key: str) -> str:
         player_lang = player.locale
+
         try:
-            if self.lang_data.get(player_lang) is None:
-                text_value = self.lang_data['en_US'][text_key]
+            if self.langs.get(player_lang) is None:
+                text_value = self.langs['en_US'][text_key]
             else:
-                if self.lang_data[player_lang].get(text_key) is None:
-                    text_value = self.lang_data['en_US'][text_key]
+                if self.langs[player_lang].get(text_key) is None:
+                    text_value = self.langs['en_US'][text_key]
                 else:
-                    text_value = self.lang_data[player_lang][text_key]
+                    text_value = self.langs[player_lang][text_key]
+
             return text_value
-        except:
+        except Exception as e:
+            self.logger.info(
+                f'{ColorFormat.RED}'
+                f'{e}'
+            )
+
             return text_key
 
     # Monitor players' joining server.
